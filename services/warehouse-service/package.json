@@ -1,0 +1,12 @@
+{
+  "name": "@aiip/warehouse-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Warehouse stock, transfers, and availability",
+  "scripts": {
+    "dev": "echo 'TODO: start warehouse service'",
+    "build": "echo 'TODO: build warehouse service'",
+    "lint": "echo 'TODO: lint warehouse service'",
+    "test": "echo 'TODO: test warehouse service'"
+  }
+}

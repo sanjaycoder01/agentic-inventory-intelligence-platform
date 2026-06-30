@@ -1,0 +1,12 @@
+{
+  "name": "@aiip/purchase-order-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Purchase order creation, approval, and supplier orders",
+  "scripts": {
+    "dev": "echo 'TODO: start purchase order service'",
+    "build": "echo 'TODO: build purchase order service'",
+    "lint": "echo 'TODO: lint purchase order service'",
+    "test": "echo 'TODO: test purchase order service'"
+  }
+}

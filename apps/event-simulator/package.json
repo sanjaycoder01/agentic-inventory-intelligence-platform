@@ -1,0 +1,12 @@
+{
+  "name": "@aiip/event-simulator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Continuously generates synthetic cart, order, rating, return, and inventory events",
+  "scripts": {
+    "dev": "echo 'TODO: start event simulator'",
+    "build": "echo 'TODO: build event simulator'",
+    "lint": "echo 'TODO: lint event simulator'",
+    "test": "echo 'TODO: test event simulator'"
+  }
+}

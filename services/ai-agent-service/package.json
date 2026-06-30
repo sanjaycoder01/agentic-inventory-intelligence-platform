@@ -1,0 +1,12 @@
+{
+  "name": "@aiip/ai-agent-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "LangGraph agent workflows, Claude integration, decision explanations",
+  "scripts": {
+    "dev": "echo 'TODO: start ai agent service'",
+    "build": "echo 'TODO: build ai agent service'",
+    "lint": "echo 'TODO: lint ai agent service'",
+    "test": "echo 'TODO: test ai agent service'"
+  }
+}

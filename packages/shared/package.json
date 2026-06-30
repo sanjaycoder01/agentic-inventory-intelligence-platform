@@ -1,0 +1,12 @@
+{
+  "name": "@aiip/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared utilities, constants, and validators",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "echo 'TODO: build shared package'",
+    "lint": "echo 'TODO: lint shared package'",
+    "test": "echo 'TODO: test shared package'"
+  }
+}

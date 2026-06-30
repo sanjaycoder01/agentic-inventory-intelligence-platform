@@ -1,0 +1,12 @@
+{
+  "name": "@aiip/inventory-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Inventory, stock updates, safety stock, available quantity",
+  "scripts": {
+    "dev": "echo 'TODO: start inventory service'",
+    "build": "echo 'TODO: build inventory service'",
+    "lint": "echo 'TODO: lint inventory service'",
+    "test": "echo 'TODO: test inventory service'"
+  }
+}

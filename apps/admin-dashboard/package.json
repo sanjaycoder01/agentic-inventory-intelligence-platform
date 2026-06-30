@@ -1,0 +1,12 @@
+{
+  "name": "@aiip/admin-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "React admin dashboard — inventory, recommendations, POs, analytics, AI chat",
+  "scripts": {
+    "dev": "echo 'TODO: start admin dashboard'",
+    "build": "echo 'TODO: build admin dashboard'",
+    "lint": "echo 'TODO: lint admin dashboard'",
+    "test": "echo 'TODO: test admin dashboard'"
+  }
+}
