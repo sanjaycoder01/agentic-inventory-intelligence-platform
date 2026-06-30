@@ -1,19 +1,16 @@
 # Architecture Decision Records
 
-ADRs document significant architectural decisions and their rationale.
+## ADR-001: Modular Monolith over Microservices
 
-## Format
-
-Each ADR follows the template:
-
-1. **Title** — Short noun phrase
-2. **Status** — Proposed | Accepted | Deprecated | Superseded
-3. **Context** — What is the issue?
-4. **Decision** — What is the change?
-5. **Consequences** — What becomes easier or harder?
+| Field | Value |
+|-------|-------|
+| **Status** | Accepted |
+| **Context** | Early-stage project needs fast iteration; domain modules are tightly coupled around the intelligence pipeline |
+| **Decision** | Single `apps/backend` with domain modules instead of separate microservices |
+| **Consequences** | Simpler local dev and deployment; can extract services later if boundaries harden |
 
 ## Index
 
 | ADR | Title | Status |
 |-----|-------|--------|
-| — | — | — |
+| ADR-001 | Modular Monolith over Microservices | Accepted |

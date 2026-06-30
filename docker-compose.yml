@@ -14,18 +14,15 @@ services:
       timeout: 5s
       retries: 5
 
-  # api-gateway:
-  #   build: ./apps/api-gateway
+  # backend:
+  #   build: ./apps/backend
   #   ports:
   #     - "3000:3000"
+  #   environment:
+  #     MONGODB_URI: mongodb://mongodb:27017/inventory_intelligence
   #   depends_on:
   #     mongodb:
   #       condition: service_healthy
-
-  # event-simulator:
-  #   build: ./apps/event-simulator
-  #   depends_on:
-  #     - api-gateway
 
 volumes:
   mongodb_data:

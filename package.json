@@ -2,15 +2,15 @@
   "name": "agentic-inventory-intelligence-platform",
   "version": "0.1.0",
   "private": true,
-  "description": "Agentic inventory intelligence platform — microservices monorepo",
+  "description": "Agentic inventory intelligence platform — modular monorepo",
   "workspaces": [
-    "apps/*",
-    "services/*",
-    "packages/*"
+    "apps/*"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
-    "dev": "docker compose up -d",
+    "dev": "docker compose up -d && npm run dev --workspace=@aiip/backend",
+    "dev:backend": "npm run dev --workspace=@aiip/backend",
+    "dev:dashboard": "npm run dev --workspace=@aiip/admin-dashboard",
     "lint": "npm run lint --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "seed": "node scripts/seed-data.js",

@@ -4,8 +4,13 @@ React application for platform operators.
 
 ## Responsibilities
 
-- Inventory Dashboard
-- Recommendations
-- Purchase Orders
-- Analytics
-- AI Chat
+- Recommendations view with score breakdown
+- Purchase order approve / reject
+- Inventory overview
+- AI assistant chat
+
+## Development
+
+```bash
+npm run dev:dashboard
+```
