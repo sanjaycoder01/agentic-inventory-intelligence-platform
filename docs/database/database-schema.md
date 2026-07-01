@@ -1,0 +1,556 @@
+# Inventory Intelligence Platform
+# Database Schema Documentation
+
+## Overview
+
+This document describes the MongoDB collections used in the Inventory Intelligence Platform.
+
+The database is designed using the principle of **Single Responsibility**.
+
+Each collection owns one business domain and avoids unnecessary duplication.
+
+---
+
+# Database Collections
+
+1. products
+2. warehouses
+3. darkStores
+4. warehouseProducts
+5. darkStoreProducts
+6. inventoryPolicies
+7. cartEvents
+8. orders
+9. ratings
+10. recommendations
+11. purchaseOrders
+
+---
+
+# 1. products
+
+## Purpose
+
+Stores master information about every product.
+
+This collection contains only static product information.
+
+### Schema
+
+```ts
+{
+  _id: ObjectId,
+
+  sku: String,
+
+  name: String,
+
+  category: String,
+
+  brand: String,
+
+  unit: String,
+
+  sellingPrice: Number,
+
+  reorderThreshold: Number,
+
+  safetyStock: Number,
+
+  shelfLifeDays: Number,
+
+  isActive: Boolean,
+
+  createdAt: Date,
+
+  updatedAt: Date
+}
+```
+
+Referenced By
+
+- warehouseProducts
+- darkStoreProducts
+- cartEvents
+- orders
+- ratings
+- recommendations
+- purchaseOrders
+
+---
+
+# 2. warehouses
+
+## Purpose
+
+Stores warehouse master information.
+
+### Schema
+
+```ts
+{
+  _id: ObjectId,
+
+  warehouseCode: String,
+
+  name: String,
+
+  address: {
+    city: String,
+    state: String,
+    country: String,
+    pincode: String
+  },
+
+  contactPerson: String,
+
+  contactNumber: String,
+
+  storageCapacity: Number,
+
+  currentUtilization: Number,
+
+  status: String,
+
+  createdAt: Date,
+
+  updatedAt: Date
+}
+```
+
+Referenced By
+
+- warehouseProducts
+- purchaseOrders
+
+---
+
+# 3. darkStores
+
+## Purpose
+
+Stores master information about every dark store.
+
+### Schema
+
+```ts
+{
+  _id: ObjectId,
+
+  darkStoreCode: String,
+
+  name: String,
+
+  address: {
+    city: String,
+    area: String,
+    state: String,
+    country: String,
+    pincode: String
+  },
+
+  warehouseId: ObjectId,
+
+  managerName: String,
+
+  contactNumber: String,
+
+  serviceRadiusKm: Number,
+
+  status: String,
+
+  createdAt: Date,
+
+  updatedAt: Date
+}
+```
+
+Referenced By
+
+- darkStoreProducts
+- inventoryPolicies
+- orders
+- cartEvents
+- ratings
+- recommendations
+
+---
+
+# 4. warehouseProducts
+
+## Purpose
+
+Stores inventory available inside warehouses.
+
+### Schema
+
+```ts
+{
+  _id: ObjectId,
+
+  warehouseId: ObjectId,
+
+  productId: ObjectId,
+
+  availableQuantity: Number,
+
+  reservedQuantity: Number,
+
+  damagedQuantity: Number,
+
+  reorderLevel: Number,
+
+  batchNumber: String,
+
+  manufacturingDate: Date,
+
+  expiryDate: Date,
+
+  supplierId: ObjectId,
+
+  lastRestockedAt: Date,
+
+  createdAt: Date,
+
+  updatedAt: Date
+}
+```
+
+---
+
+# 5. darkStoreProducts
+
+## Purpose
+
+Stores live inventory inside every dark store.
+
+Also stores aggregated rating metrics used by the Intelligence Engine.
+
+### Schema
+
+```ts
+{
+  _id: ObjectId,
+
+  darkStoreId: ObjectId,
+
+  productId: ObjectId,
+
+  availableQuantity: Number,
+
+  reservedQuantity: Number,
+
+  damagedQuantity: Number,
+
+  averageRating: Number,
+
+  totalRatings: Number,
+
+  lastTransferredAt: Date,
+
+  createdAt: Date,
+
+  updatedAt: Date
+}
+```
+
+---
+
+# 6. inventoryPolicies
+
+## Purpose
+
+Stores replenishment rules for every product at every location.
+
+### Schema
+
+```ts
+{
+  _id: ObjectId,
+
+  locationType: String,
+
+  locationId: ObjectId,
+
+  productId: ObjectId,
+
+  minimumStockLevel: Number,
+
+  maximumStockLevel: Number,
+
+  reorderQuantity: Number,
+
+  safetyStock: Number,
+
+  isAutoReorderEnabled: Boolean,
+
+  createdAt: Date,
+
+  updatedAt: Date
+}
+```
+
+---
+
+# 7. cartEvents
+
+## Purpose
+
+Stores every Add-to-Cart and Remove-from-Cart event.
+
+Primary source for Demand Score.
+
+### Schema
+
+```ts
+{
+  _id: ObjectId,
+
+  eventId: String,
+
+  productId: ObjectId,
+
+  darkStoreId: ObjectId,
+
+  quantity: Number,
+
+  eventType: String,
+
+  eventTimestamp: Date,
+
+  sessionId: String,
+
+  createdAt: Date
+}
+```
+
+---
+
+# 8. orders
+
+## Purpose
+
+Stores completed customer purchases.
+
+Used for Order Conversion Score.
+
+### Schema
+
+```ts
+{
+  _id: ObjectId,
+
+  orderId: String,
+
+  productId: ObjectId,
+
+  darkStoreId: ObjectId,
+
+  quantity: Number,
+
+  sellingPrice: Number,
+
+  orderStatus: String,
+
+  orderedAt: Date,
+
+  deliveredAt: Date,
+
+  sessionId: String,
+
+  createdAt: Date
+}
+```
+
+---
+
+# 9. ratings
+
+## Purpose
+
+Stores every customer rating and review.
+
+Acts as the source of truth for customer feedback.
+
+### Schema
+
+```ts
+{
+  _id: ObjectId,
+
+  ratingId: String,
+
+  productId: ObjectId,
+
+  darkStoreId: ObjectId,
+
+  orderId: ObjectId,
+
+  rating: Number,
+
+  review: String,
+
+  ratedAt: Date,
+
+  createdAt: Date
+}
+```
+
+---
+
+# 10. recommendations
+
+## Purpose
+
+Stores recommendations generated by the Inventory Intelligence Engine.
+
+Displayed on the Admin Dashboard.
+
+### Schema
+
+```ts
+{
+  _id: ObjectId,
+
+  recommendationId: String,
+
+  productId: ObjectId,
+
+  darkStoreId: ObjectId,
+
+  warehouseId: ObjectId,
+
+  recommendationType: String,
+
+  recommendationReason: String,
+
+  demandScore: Number,
+
+  conversionScore: Number,
+
+  ratingScore: Number,
+
+  overallScore: Number,
+
+  recommendedQuantity: Number,
+
+  decisionSnapshot: {
+      availableStock: Number,
+      minimumStockLevel: Number,
+      averageRating: Number,
+      totalRatings: Number,
+      cartCount24h: Number,
+      orders24h: Number,
+      conversionRate: Number
+  },
+
+  status: String,
+
+  generatedAt: Date,
+
+  approvedBy: String,
+
+  approvedAt: Date,
+
+  createdAt: Date,
+
+  updatedAt: Date
+}
+```
+
+---
+
+# 11. purchaseOrders
+
+## Purpose
+
+Stores approved inventory movement requests.
+
+Created only after admin approval.
+
+### Schema
+
+```ts
+{
+  _id: ObjectId,
+
+  purchaseOrderId: String,
+
+  recommendationId: ObjectId,
+
+  productId: ObjectId,
+
+  warehouseId: ObjectId,
+
+  darkStoreId: ObjectId,
+
+  quantity: Number,
+
+  orderType: String,
+
+  status: String,
+
+  approvedBy: String,
+
+  approvedAt: Date,
+
+  expectedDeliveryDate: Date,
+
+  completedAt: Date,
+
+  remarks: String,
+
+  createdAt: Date,
+
+  updatedAt: Date
+}
+```
+
+---
+
+# Collection Relationships
+
+```
+
+products
+│
+├── warehouseProducts
+├── darkStoreProducts
+├── cartEvents
+├── orders
+├── ratings
+├── recommendations
+└── purchaseOrders
+
+warehouses
+│
+├── warehouseProducts
+└── purchaseOrders
+
+darkStores
+│
+├── darkStoreProducts
+├── cartEvents
+├── orders
+├── ratings
+├── inventoryPolicies
+└── recommendations
+
+recommendations
+│
+└── purchaseOrders
+
+```
+
+---
+
+# Design Principles
+
+- Single Responsibility per collection
+- Product metadata separated from inventory
+- Warehouse and Dark Store inventory separated
+- Raw events (cart, orders, ratings) stored independently
+- Aggregated values (averageRating, totalRatings) stored in `darkStoreProducts` for fast reads
+- Recommendations are immutable business decisions
+- Purchase Orders are created only after admin approval
+- Designed for scalability and future migration to microservices
