@@ -1,5 +1,5 @@
-import { recommendationService } from "../modules/intelligence/recommendation.service.js";
-import type { AgentNode } from "./types.js";
+import { recommendationService } from "../../modules/intelligence/recommendation.service.js";
+import type { AgentNode } from "../types.js";
 
 export const gatherContextNode: AgentNode = async (state) => {
   const recommendation = await recommendationService.generateForProduct(

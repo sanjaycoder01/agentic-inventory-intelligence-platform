@@ -16,21 +16,25 @@ export class InventoryService {
       throw new Error("Insufficient stock");
     }
 
-    const sortedBatches = [...inventory.batches].sort((a, b) => {
+    inventory.batches.sort((a, b) => {
       const aExpiry = a.expiryDate?.getTime() ?? Number.MAX_SAFE_INTEGER;
       const bExpiry = b.expiryDate?.getTime() ?? Number.MAX_SAFE_INTEGER;
       return aExpiry - bExpiry;
     });
 
     let remaining = quantity;
-    for (const batch of sortedBatches) {
+    for (const batch of inventory.batches) {
       if (remaining <= 0) break;
       const take = Math.min(batch.quantity, remaining);
       batch.quantity -= take;
       remaining -= take;
     }
 
-    inventory.batches = sortedBatches.filter((b) => b.quantity > 0);
+    for (let i = inventory.batches.length - 1; i >= 0; i--) {
+      if (inventory.batches[i].quantity <= 0) {
+        inventory.batches.splice(i, 1);
+      }
+    }
     inventory.availableQuantity -= quantity;
     await inventory.save();
     return inventory;
