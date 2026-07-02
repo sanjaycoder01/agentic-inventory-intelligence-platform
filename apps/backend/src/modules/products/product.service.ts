@@ -1,51 +1,67 @@
-import { AppError } from "../../middleware/error-handler.js";
+import { ConflictError, NotFoundError } from "../../middleware/app-errors.js";
+import { logger } from "../../utils/logger.js";
 import { ProductModel } from "./product.model.js";
-import type { CreateProductDTO, UpdateProductDTO } from "./product.types.js";
+import { PRODUCT_ERRORS, PRODUCT_LOG } from "./product.constants.js";
+import {
+  toProductResponseDTO,
+  toProductResponseList,
+  type ProductResponseDTO,
+} from "./product.types.js";
+import type { CreateProductDTO, UpdateProductDTO } from "./product.validation.js";
 
 export class ProductService {
-  async createProduct(data: CreateProductDTO) {
+  async createProduct(data: CreateProductDTO): Promise<ProductResponseDTO> {
+    logger.info(PRODUCT_LOG.CREATING, { sku: data.sku });
+
     const existing = await ProductModel.findOne({ sku: data.sku });
     if (existing) {
-      throw new AppError(409, `Product with SKU ${data.sku} already exists`);
+      throw new ConflictError(PRODUCT_ERRORS.ALREADY_EXISTS(data.sku));
     }
 
-    return ProductModel.create(data);
+    const product = await ProductModel.create(data);
+
+    logger.info(PRODUCT_LOG.CREATED, { productId: product._id.toString(), sku: data.sku });
+
+    return toProductResponseDTO(product);
   }
 
-  async getProductById(id: string) {
+  async getProductById(id: string): Promise<ProductResponseDTO> {
     const product = await ProductModel.findById(id);
     if (!product) {
-      throw new AppError(404, `Product ${id} not found`);
+      throw new NotFoundError(PRODUCT_ERRORS.NOT_FOUND(id));
     }
 
-    return product;
+    return toProductResponseDTO(product);
   }
 
-  async getAllProducts() {
-    return ProductModel.find({ isActive: true }).sort({ name: 1 });
+  async getAllProducts(): Promise<ProductResponseDTO[]> {
+    const products = await ProductModel.find({ isActive: true }).sort({ name: 1 });
+    return toProductResponseList(products);
   }
 
-  async updateProduct(id: string, data: UpdateProductDTO) {
-    const updates: UpdateProductDTO = {};
+  async updateProduct(
+    id: string,
+    data: UpdateProductDTO,
+  ): Promise<ProductResponseDTO> {
+    logger.info(PRODUCT_LOG.UPDATING, { productId: id });
 
-    if (data.name !== undefined) updates.name = data.name;
-    if (data.category !== undefined) updates.category = data.category;
-    if (data.brand !== undefined) updates.brand = data.brand;
-    if (data.sellingPrice !== undefined) updates.sellingPrice = data.sellingPrice;
-
-    const product = await ProductModel.findByIdAndUpdate(id, updates, {
+    const product = await ProductModel.findByIdAndUpdate(id, data, {
       new: true,
       runValidators: true,
     });
 
     if (!product) {
-      throw new AppError(404, `Product ${id} not found`);
+      throw new NotFoundError(PRODUCT_ERRORS.NOT_FOUND(id));
     }
 
-    return product;
+    logger.info(PRODUCT_LOG.UPDATED, { productId: id });
+
+    return toProductResponseDTO(product);
   }
 
-  async deleteProduct(id: string) {
+  async deleteProduct(id: string): Promise<ProductResponseDTO> {
+    logger.info(PRODUCT_LOG.DEACTIVATING, { productId: id });
+
     const product = await ProductModel.findByIdAndUpdate(
       id,
       { isActive: false },
@@ -53,10 +69,12 @@ export class ProductService {
     );
 
     if (!product) {
-      throw new AppError(404, `Product ${id} not found`);
+      throw new NotFoundError(PRODUCT_ERRORS.NOT_FOUND(id));
     }
 
-    return product;
+    logger.info(PRODUCT_LOG.DEACTIVATED, { productId: id });
+
+    return toProductResponseDTO(product);
   }
 }
 

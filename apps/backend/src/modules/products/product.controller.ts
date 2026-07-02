@@ -1,86 +1,43 @@
-import type { NextFunction, Request, Response } from "express";
+import type { Request, Response } from "express";
+import { asyncHandler } from "../../middleware/async-handler.js";
+import { sendSuccess } from "../../utils/response.js";
+import { PRODUCT_MESSAGES } from "./product.constants.js";
 import { productService } from "./product.service.js";
-import type { CreateProductDTO, UpdateProductDTO } from "./product.types.js";
+import type { CreateProductDTO, UpdateProductDTO } from "./product.validation.js";
 
 export class ProductController {
-  createProduct = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const product = await productService.createProduct(
-        req.body as CreateProductDTO,
-      );
+  createProduct = asyncHandler(async (req: Request, res: Response) => {
+    const product = await productService.createProduct(req.body as CreateProductDTO);
 
-      res.status(201).json({
-        success: true,
-        message: "Product created successfully",
-        data: product,
-      });
-    } catch (err) {
-      next(err);
-    }
-  };
+    sendSuccess(res, 201, PRODUCT_MESSAGES.CREATED, product);
+  });
 
-  getProductById = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const product = await productService.getProductById(
-        req.params.id as string,
-      );
+  getProductById = asyncHandler(async (req: Request, res: Response) => {
+    const product = await productService.getProductById(req.params.id);
 
-      res.json({
-        success: true,
-        message: "Product retrieved successfully",
-        data: product,
-      });
-    } catch (err) {
-      next(err);
-    }
-  };
+    sendSuccess(res, 200, PRODUCT_MESSAGES.RETRIEVED, product);
+  });
 
-  getAllProducts = async (_req: Request, res: Response, next: NextFunction) => {
-    try {
-      const products = await productService.getAllProducts();
+  getAllProducts = asyncHandler(async (_req: Request, res: Response) => {
+    const products = await productService.getAllProducts();
 
-      res.json({
-        success: true,
-        message: "Products retrieved successfully",
-        data: products,
-      });
-    } catch (err) {
-      next(err);
-    }
-  };
+    sendSuccess(res, 200, PRODUCT_MESSAGES.RETRIEVED_ALL, products);
+  });
 
-  updateProduct = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const product = await productService.updateProduct(
-        req.params.id as string,
-        req.body as UpdateProductDTO,
-      );
+  updateProduct = asyncHandler(async (req: Request, res: Response) => {
+    const product = await productService.updateProduct(
+      req.params.id,
+      req.body as UpdateProductDTO,
+    );
 
-      res.json({
-        success: true,
-        message: "Product updated successfully",
-        data: product,
-      });
-    } catch (err) {
-      next(err);
-    }
-  };
+    sendSuccess(res, 200, PRODUCT_MESSAGES.UPDATED, product);
+  });
 
-  deleteProduct = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const product = await productService.deleteProduct(
-        req.params.id as string,
-      );
+  deleteProduct = asyncHandler(async (req: Request, res: Response) => {
+    const product = await productService.deleteProduct(req.params.id);
 
-      res.json({
-        success: true,
-        message: "Product deactivated successfully",
-        data: product,
-      });
-    } catch (err) {
-      next(err);
-    }
-  };
+    sendSuccess(res, 200, PRODUCT_MESSAGES.DEACTIVATED, product);
+  });
 }
 
 export const productController = new ProductController();
