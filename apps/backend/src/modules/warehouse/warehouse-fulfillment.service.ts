@@ -1,8 +1,8 @@
-import { inventoryService } from "../inventory/inventory.service.js";
+import { inventoryLegacyService } from "../inventory/inventory-legacy.service.js";
 
 export class WarehouseFulfillmentService {
   async checkFulfillment(productId: string, quantity: number) {
-    const inventory = await inventoryService.getByProductId(productId);
+    const inventory = await inventoryLegacyService.getByProductId(productId);
     if (!inventory) {
       return { canFulfill: false, reason: "Product not found" };
     }
@@ -17,7 +17,7 @@ export class WarehouseFulfillmentService {
   }
 
   async getStockSummary() {
-    const items = await inventoryService.list();
+    const items = await inventoryLegacyService.list();
     return items.map((item) => ({
       productId: item.productId,
       productName: item.productName,

@@ -1,4 +1,4 @@
-import { inventoryService } from "../inventory/inventory.service.js";
+import { inventoryLegacyService } from "../inventory/inventory-legacy.service.js";
 import { recommendationService } from "../intelligence/recommendation.service.js";
 import { purchaseOrderService } from "../purchase-orders/po.service.js";
 import { warehouseFulfillmentService } from "../warehouse/warehouse-fulfillment.service.js";
@@ -16,7 +16,7 @@ export const assistantTools = [
       required: ["productId"],
     },
     handler: async (input: { productId: string }) =>
-      inventoryService.getByProductId(input.productId),
+      inventoryLegacyService.getByProductId(input.productId),
   },
   {
     name: "get_recommendation",

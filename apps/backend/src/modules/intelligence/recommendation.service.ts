@@ -1,5 +1,5 @@
 import { demandService } from "../demand/demand.service.js";
-import { inventoryService } from "../inventory/inventory.service.js";
+import { inventoryLegacyService } from "../inventory/inventory-legacy.service.js";
 import { evaluateEligibility } from "./eligibility.js";
 import { scoreProduct } from "./scoring.js";
 
@@ -7,7 +7,7 @@ const LOOKBACK_DAYS = 7;
 
 export class RecommendationService {
   async generateForProduct(productId: string) {
-    const inventory = await inventoryService.getByProductId(productId);
+    const inventory = await inventoryLegacyService.getByProductId(productId);
     if (!inventory) {
       throw new Error(`Product ${productId} not found`);
     }
@@ -46,7 +46,7 @@ export class RecommendationService {
   }
 
   async listRecommendations() {
-    const items = await inventoryService.list();
+    const items = await inventoryLegacyService.list();
     return Promise.all(items.map((item) => this.generateForProduct(item.productId)));
   }
 }

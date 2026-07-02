@@ -28,3 +28,10 @@ export class ValidationError extends AppError {
     this.name = "ValidationError";
   }
 }
+
+export class InsufficientStockError extends AppError {
+  constructor(message: string) {
+    super(409, message);
+    this.name = "InsufficientStockError";
+  }
+}

@@ -2,7 +2,7 @@ import type { ErrorRequestHandler, RequestHandler } from "express";
 import { ZodError } from "zod";
 import { AppError } from "./app-errors.js";
 
-export { AppError, ConflictError, NotFoundError, ValidationError } from "./app-errors.js";
+export { AppError, ConflictError, InsufficientStockError, NotFoundError, ValidationError } from "./app-errors.js";
 
 export const notFoundHandler: RequestHandler = (_req, _res, next) => {
   next(new AppError(404, "Route not found"));
