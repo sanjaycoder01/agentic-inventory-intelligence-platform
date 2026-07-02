@@ -1,26 +1,15 @@
 import { Router } from "express";
-import { warehouseService } from "./warehouse.service.js";
+import { warehouseController } from "./warehouse.controller.js";
+import {
+  validateCreateWarehouse,
+  validateUpdateWarehouse,
+  validateWarehouseIdParam,
+} from "./warehouse.validation.js";
 
 export const warehouseRouter = Router();
 
-warehouseRouter.get("/stock", async (_req, res, next) => {
-  try {
-    const summary = await warehouseService.getStockSummary();
-    res.json(summary);
-  } catch (err) {
-    next(err);
-  }
-});
-
-warehouseRouter.get("/fulfillment/:productId", async (req, res, next) => {
-  try {
-    const quantity = Number(req.query.quantity ?? 1);
-    const result = await warehouseService.checkFulfillment(
-      req.params.productId,
-      quantity,
-    );
-    res.json(result);
-  } catch (err) {
-    next(err);
-  }
-});
+warehouseRouter.post("/", validateCreateWarehouse, warehouseController.createWarehouse);
+warehouseRouter.get("/", warehouseController.getAllWarehouses);
+warehouseRouter.get("/:id", validateWarehouseIdParam, warehouseController.getWarehouseById);
+warehouseRouter.put("/:id", validateUpdateWarehouse, warehouseController.updateWarehouse);
+warehouseRouter.delete("/:id", validateWarehouseIdParam, warehouseController.deleteWarehouse);

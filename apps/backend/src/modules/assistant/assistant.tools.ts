@@ -1,7 +1,7 @@
 import { inventoryService } from "../inventory/inventory.service.js";
 import { recommendationService } from "../intelligence/recommendation.service.js";
 import { purchaseOrderService } from "../purchase-orders/po.service.js";
-import { warehouseService } from "../warehouse/warehouse.service.js";
+import { warehouseFulfillmentService } from "../warehouse/warehouse-fulfillment.service.js";
 
 /** Read-only tools exposed to the Claude assistant */
 export const assistantTools = [
@@ -55,7 +55,7 @@ export const assistantTools = [
       required: ["productId", "quantity"],
     },
     handler: async (input: { productId: string; quantity: number }) =>
-      warehouseService.checkFulfillment(input.productId, input.quantity),
+      warehouseFulfillmentService.checkFulfillment(input.productId, input.quantity),
   },
 ];
 

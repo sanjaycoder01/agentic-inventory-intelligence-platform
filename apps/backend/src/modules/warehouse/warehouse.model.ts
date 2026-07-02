@@ -1,5 +1,13 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
 
+export const WAREHOUSE_STATUSES = [
+  "ACTIVE",
+  "INACTIVE",
+  "UNDER_MAINTENANCE",
+] as const;
+
+export type WarehouseStatus = (typeof WAREHOUSE_STATUSES)[number];
+
 const warehouseAddressSchema = new Schema(
   {
     city: { type: String, required: true },
@@ -17,9 +25,15 @@ const warehouseSchema = new Schema(
     address: { type: warehouseAddressSchema, required: true },
     contactPerson: { type: String, required: true },
     contactNumber: { type: String, required: true },
-    storageCapacity: { type: Number, required: true, min: 0 },
+    storageCapacity: { type: Number, required: true, min: 1 },
     currentUtilization: { type: Number, required: true, min: 0, default: 0 },
-    status: { type: String, required: true, index: true },
+    status: {
+      type: String,
+      enum: WAREHOUSE_STATUSES,
+      required: true,
+      default: "ACTIVE",
+      index: true,
+    },
   },
   {
     timestamps: true,

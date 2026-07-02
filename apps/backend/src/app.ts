@@ -5,6 +5,7 @@ import {
   notFoundHandler,
 } from "./middleware/error-handler.js";
 import { productRouter } from "./modules/products/product.routes.js";
+import { warehouseRouter } from "./modules/warehouse/warehouse.routes.js";
 
 export function createApp(): Express {
   const app = express();
@@ -17,6 +18,7 @@ export function createApp(): Express {
   });
 
   app.use("/api/v1/products", productRouter);
+  app.use("/api/v1/warehouses", warehouseRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
