@@ -1,5 +1,6 @@
 import { demandService } from "../demand/demand.service.js";
 import { inventoryLegacyService } from "../inventory/inventory-legacy.service.js";
+import { orderService } from "../orders/order.service.js";
 import { evaluateEligibility } from "./eligibility.js";
 import { scoreProduct } from "./scoring.js";
 
@@ -17,7 +18,7 @@ export class RecommendationService {
 
     const [cartCount, conversionRate] = await Promise.all([
       demandService.getCartCount(productId, since),
-      demandService.getConversionRate(productId, since),
+      orderService.getConversionRate(productId, since),
     ]);
 
     const scores = scoreProduct({

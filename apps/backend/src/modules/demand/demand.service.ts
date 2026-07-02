@@ -4,7 +4,6 @@ import { NotFoundError, ValidationError } from "../../middleware/app-errors.js";
 import { logger } from "../../utils/logger.js";
 import { DarkStoreModel } from "../dark-store/dark-store.model.js";
 import { ProductModel } from "../products/product.model.js";
-import { OrderModel } from "./order.model.js";
 import { DEMAND_ERRORS, DEMAND_LOG, DEMAND_WINDOW_HOURS } from "./demand.constants.js";
 import { CartEventModel } from "./demand.model.js";
 import {
@@ -214,21 +213,6 @@ export class DemandService {
       }))
       .sort((a, b) => b.demandScore - a.demandScore || b.cartCount24h - a.cartCount24h)
       .slice(0, limit);
-  }
-
-  /** Temporary read helper until the Orders module owns conversion metrics. */
-  async getConversionRate(productId: string, since: Date): Promise<number> {
-    assertValidObjectId(productId, "product ID");
-
-    const [cartCount, orderCount] = await Promise.all([
-      this.getCartCount(productId, since),
-      OrderModel.countDocuments({
-        productId,
-        orderedAt: { $gte: since },
-      }),
-    ]);
-
-    return cartCount === 0 ? 0 : orderCount / cartCount;
   }
 }
 

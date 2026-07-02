@@ -1,5 +1,10 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
 
+export const ORDER_STATUSES = ["PLACED", "DELIVERED", "CANCELLED"] as const;
+export type OrderStatus = (typeof ORDER_STATUSES)[number];
+
+export const COMPLETED_ORDER_STATUSES = ["DELIVERED"] as const;
+
 const orderSchema = new Schema(
   {
     orderId: { type: String, required: true, unique: true, index: true },
@@ -17,7 +22,12 @@ const orderSchema = new Schema(
     },
     quantity: { type: Number, required: true, min: 1 },
     sellingPrice: { type: Number, required: true, min: 0 },
-    orderStatus: { type: String, required: true, index: true },
+    orderStatus: {
+      type: String,
+      enum: ORDER_STATUSES,
+      required: true,
+      index: true,
+    },
     orderedAt: { type: Date, required: true, index: true },
     deliveredAt: { type: Date },
     sessionId: { type: String, required: true, index: true },
