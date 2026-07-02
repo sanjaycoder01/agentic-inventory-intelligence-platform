@@ -4,6 +4,7 @@ import {
   errorHandler,
   notFoundHandler,
 } from "./middleware/error-handler.js";
+import { productRouter } from "./modules/products/product.routes.js";
 
 export function createApp(): Express {
   const app = express();
@@ -14,6 +15,8 @@ export function createApp(): Express {
   app.get("/health", (_req, res) => {
     res.json({ status: "ok" });
   });
+
+  app.use("/api/v1/products", productRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
