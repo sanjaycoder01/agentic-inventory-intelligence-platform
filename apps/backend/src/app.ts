@@ -10,6 +10,7 @@ import {
   demandRouter,
 } from "./modules/demand/demand.routes.js";
 import { orderRouter } from "./modules/orders/order.routes.js";
+import { ratingRouter } from "./modules/ratings/rating.routes.js";
 import { warehouseRouter } from "./modules/warehouse/warehouse.routes.js";
 
 export function createApp(): Express {
@@ -27,6 +28,7 @@ export function createApp(): Express {
   app.use("/api/v1/cart-events", cartEventRouter);
   app.use("/api/v1/demand", demandRouter);
   app.use("/api/v1/orders", orderRouter);
+  app.use("/api/v1/ratings", ratingRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
