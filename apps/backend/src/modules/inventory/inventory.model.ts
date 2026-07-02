@@ -12,7 +12,8 @@ const inventoryBatchSchema = new Schema(
 
 const inventorySchema = new Schema(
   {
-    productId: { type: String, required: true, unique: true, index: true },
+    productId: { type: Schema.Types.ObjectId, ref: "Product", required: true, unique: true, index: true },
+    darkStoreId: { type: Schema.Types.ObjectId, ref: "DarkStore", required: true, index: true },
     productName: { type: String, required: true },
     category: { type: String, required: true },
     safetyStock: { type: Number, required: true, min: 0 },
