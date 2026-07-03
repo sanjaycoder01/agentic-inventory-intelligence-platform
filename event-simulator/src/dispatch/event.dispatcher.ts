@@ -5,15 +5,30 @@ import type { SimulatorEvent } from "../generators/simulator-event.types.js";
 export type CartEvent = SimulatorEvent<"CART", unknown>;
 export type DispatchableSimulatorEvent = CartEvent | OrderEvent | RatingEvent;
 
+export type BackendClientResult =
+  | {
+      success: true;
+      status: number;
+      eventId?: string;
+      response: unknown;
+    }
+  | {
+      success: false;
+      status?: number;
+      error: string;
+      response?: unknown;
+    };
+
 export interface BackendClientPort {
-  sendCartEvent(event: CartEvent): Promise<void>;
-  sendOrder(event: OrderEvent): Promise<void>;
-  sendRating(event: RatingEvent): Promise<void>;
+  sendCartEvent(event: CartEvent): Promise<BackendClientResult>;
+  sendOrder(event: OrderEvent): Promise<BackendClientResult>;
+  sendRating(event: RatingEvent): Promise<BackendClientResult>;
 }
 
 export interface EventDispatchResult {
   simulationRunId: string;
   type: DispatchableSimulatorEvent["type"];
+  result: BackendClientResult;
   dispatchedAt: Date;
 }
 
@@ -27,11 +42,12 @@ export class EventDispatcher {
     const results: EventDispatchResult[] = [];
 
     for (const event of eventList) {
-      await this.dispatchOne(event);
+      const result = await this.dispatchOne(event);
 
       results.push({
         simulationRunId: event.simulationRunId,
         type: event.type,
+        result,
         dispatchedAt: new Date(),
       });
     }
@@ -39,17 +55,16 @@ export class EventDispatcher {
     return results;
   }
 
-  private async dispatchOne(event: DispatchableSimulatorEvent): Promise<void> {
+  private async dispatchOne(
+    event: DispatchableSimulatorEvent,
+  ): Promise<BackendClientResult> {
     switch (event.type) {
       case "CART":
-        await this.backendClient.sendCartEvent(event);
-        return;
+        return this.backendClient.sendCartEvent(event);
       case "ORDER":
-        await this.backendClient.sendOrder(event);
-        return;
+        return this.backendClient.sendOrder(event);
       case "RATING":
-        await this.backendClient.sendRating(event);
-        return;
+        return this.backendClient.sendRating(event);
       default:
         assertNever(event);
     }
