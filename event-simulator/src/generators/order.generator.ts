@@ -6,6 +6,7 @@ import type { SimulatorEvent } from "./simulator-event.types.js";
 export type SyntheticOrderStatus = "DELIVERED";
 
 export interface OrderDTO {
+  orderId: string;
   customerId: string;
   sessionId: string;
   darkStoreId: string;
@@ -32,6 +33,7 @@ const PERSONA_ORDER_QUANTITY_RANGES: Record<PersonaId, QuantityRange> = {
 
 export function generateOrderEvent(
   decision: ProductAwareCustomerDecision,
+  simulationRunId: string,
 ): OrderEvent | null {
   if (!decision.placeOrder) {
     return null;
@@ -52,8 +54,10 @@ export function generateOrderEvent(
   }
 
   return {
+    simulationRunId,
     type: "ORDER",
     payload: {
+      orderId: createSyntheticOrderId(simulationRunId, decision.customerId),
       customerId: decision.customerId,
       sessionId: decision.customerId,
       darkStoreId: decision.darkStoreId,
@@ -70,4 +74,11 @@ function getOrderQuantity(decision: ProductAwareCustomerDecision): number {
   const personaQuantity = randomInt(range.min, range.max);
 
   return Math.min(personaQuantity, decision.product?.availableToSell ?? 0);
+}
+
+function createSyntheticOrderId(
+  simulationRunId: string,
+  customerId: string,
+): string {
+  return `${simulationRunId}-ORDER-${customerId}`;
 }

@@ -58,10 +58,10 @@ export function randomInt(min: number, max: number): number {
 }
 
 export function ratingAroundAverage(averageRating: number): number {
-  const variance = Math.random() * 0.8 - 0.4;
-  const rating = clamp(averageRating + variance, 1, 5);
+  const variance = randomNormal() * 0.75;
+  const rating = clamp(Math.round(averageRating + variance), 1, 5);
 
-  return Number(rating.toFixed(1));
+  return rating;
 }
 
 export function blendProbabilities(
@@ -77,4 +77,11 @@ function clampProbability(probability: number): number {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
+}
+
+function randomNormal(): number {
+  const first = Math.max(Math.random(), Number.EPSILON);
+  const second = Math.random();
+
+  return Math.sqrt(-2 * Math.log(first)) * Math.cos(2 * Math.PI * second);
 }
