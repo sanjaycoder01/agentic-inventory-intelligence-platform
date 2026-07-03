@@ -1,54 +1,39 @@
-import { demandService } from "../demand/demand.service.js";
-import { inventoryLegacyService } from "../inventory/inventory-legacy.service.js";
-import { orderService } from "../orders/order.service.js";
-import { evaluateEligibility } from "./eligibility.js";
-import { scoreProduct } from "./scoring.js";
-
-const LOOKBACK_DAYS = 7;
+import { recommendationRules } from "./recommendation.rules.js";
+import type {
+  AggregatedSignals,
+  EligibilityResult,
+  RecommendationResult,
+  RecommendationRule,
+} from "./recommendation.types.js";
 
 export class RecommendationService {
-  async generateForProduct(productId: string) {
-    const inventory = await inventoryLegacyService.getByProductId(productId);
-    if (!inventory) {
-      throw new Error(`Product ${productId} not found`);
-    }
+  constructor(private readonly rules: RecommendationRule[] = recommendationRules) {}
 
-    const since = new Date();
-    since.setDate(since.getDate() - LOOKBACK_DAYS);
-
-    const [cartCount, conversionRate] = await Promise.all([
-      demandService.getCartCount(productId, since),
-      orderService.getConversionRate(productId, since),
-    ]);
-
-    const scores = scoreProduct({
-      cartCount,
-      avgRating: 4,
-      conversionRate,
-      availableQuantity: inventory.availableQuantity,
-      safetyStock: inventory.safetyStock,
-      category: inventory.category,
-    });
-
-    const eligibility = evaluateEligibility(
-      scores,
-      inventory.availableQuantity,
-      inventory.safetyStock,
-      inventory.category,
+  recommend(
+    signals: AggregatedSignals,
+    eligibility: EligibilityResult,
+  ): RecommendationResult {
+    const matchedRule = this.rules.find((rule) =>
+      rule.matches(signals, eligibility),
     );
 
-    return {
-      productId,
-      productName: inventory.productName,
-      scores,
-      eligibility,
-      generatedAt: new Date().toISOString(),
-    };
+    if (!matchedRule) {
+      throw new Error("Recommendation engine has no fallback rule configured");
+    }
+
+    return matchedRule.buildResult(signals, eligibility);
   }
 
-  async listRecommendations() {
-    const items = await inventoryLegacyService.list();
-    return Promise.all(items.map((item) => this.generateForProduct(item.productId)));
+  async generateForProduct(_productId: string): Promise<any> {
+    throw new Error(
+      "generateForProduct is deprecated. Use signalAggregatorService, eligibilityService, and recommend instead.",
+    );
+  }
+
+  async listRecommendations(): Promise<any> {
+    throw new Error(
+      "listRecommendations is deprecated. Use the Phase 5 intelligence pipeline instead.",
+    );
   }
 }
 
