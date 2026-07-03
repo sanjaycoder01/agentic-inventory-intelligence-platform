@@ -8,6 +8,11 @@ export const poorRatingScenario: Scenario = {
   durationMinutes: 30,
   targetProducts: ["Staples"],
   targetDarkStores: ["ALL"],
+  personaMix: [
+    { personaId: "FREQUENT_BUYER", weight: 0.45 },
+    { personaId: "FAMILY", weight: 0.35 },
+    { personaId: "OFFICE_EMPLOYEE", weight: 0.2 },
+  ],
   behavior: {
     cartEventsPerMinute: 90,
     conversionRate: 0.75,

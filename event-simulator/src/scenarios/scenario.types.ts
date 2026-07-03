@@ -4,6 +4,19 @@ export type ScenarioId =
   | "POOR_RATING"
   | "DEAD_STOCK";
 
+export type PersonaId =
+  | "STUDENT"
+  | "FAMILY"
+  | "OFFICE_EMPLOYEE"
+  | "FREQUENT_BUYER"
+  | "WINDOW_SHOPPER"
+  | "IMPULSE_BUYER";
+
+export interface PersonaMix {
+  personaId: PersonaId;
+  weight: number;
+}
+
 export interface ScenarioBehavior {
   cartEventsPerMinute: number;
   conversionRate: number;
@@ -18,5 +31,6 @@ export interface Scenario {
   durationMinutes: number;
   targetProducts: string[];
   targetDarkStores: string[];
+  personaMix: PersonaMix[];
   behavior: ScenarioBehavior;
 }

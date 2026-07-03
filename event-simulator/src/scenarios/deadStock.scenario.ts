@@ -8,6 +8,11 @@ export const deadStockScenario: Scenario = {
   durationMinutes: 30,
   targetProducts: ["Premium Cereal"],
   targetDarkStores: ["ALL"],
+  personaMix: [
+    { personaId: "WINDOW_SHOPPER", weight: 0.5 },
+    { personaId: "STUDENT", weight: 0.25 },
+    { personaId: "IMPULSE_BUYER", weight: 0.25 },
+  ],
   behavior: {
     cartEventsPerMinute: 8,
     conversionRate: 0.12,

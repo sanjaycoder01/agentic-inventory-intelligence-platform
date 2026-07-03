@@ -8,6 +8,11 @@ export const highDemandScenario: Scenario = {
   durationMinutes: 30,
   targetProducts: ["Milk"],
   targetDarkStores: ["ALL"],
+  personaMix: [
+    { personaId: "FAMILY", weight: 0.5 },
+    { personaId: "OFFICE_EMPLOYEE", weight: 0.3 },
+    { personaId: "STUDENT", weight: 0.2 },
+  ],
   behavior: {
     cartEventsPerMinute: 120,
     conversionRate: 0.9,

@@ -8,6 +8,10 @@ export const windowShoppingScenario: Scenario = {
   durationMinutes: 30,
   targetProducts: ["MacBook"],
   targetDarkStores: ["ALL"],
+  personaMix: [
+    { personaId: "WINDOW_SHOPPER", weight: 0.8 },
+    { personaId: "IMPULSE_BUYER", weight: 0.2 },
+  ],
   behavior: {
     cartEventsPerMinute: 100,
     conversionRate: 0.05,
