@@ -22,6 +22,7 @@ export interface RecommendationSnapshotDTO {
   recommendationId: string;
   productId: string;
   darkStoreId: string;
+  warehouseId?: string;
   recommendation: string;
   matchedRule: string;
   confidence: number;
@@ -30,6 +31,7 @@ export interface RecommendationSnapshotDTO {
   conversionScore: number;
   ratingScore: number;
   availableQuantity: number;
+  reservedQuantity?: number;
   warehouseStock: number;
   summary: string;
   factors: string[];
@@ -47,6 +49,7 @@ type RecommendationLike = RecommendationDocument & {
   recommendationId: string;
   productId: { toString(): string };
   darkStoreId: { toString(): string };
+  warehouseId?: { toString(): string } | null;
   recommendationType: string;
   matchedRule: string;
   overallScore: number;
@@ -55,6 +58,7 @@ type RecommendationLike = RecommendationDocument & {
   conversionScore: number;
   ratingScore: number;
   availableQuantity: number;
+  reservedQuantity?: number | null;
   warehouseStock: number;
   summary: string;
   factors: string[];
@@ -75,6 +79,7 @@ export function toRecommendationSnapshotDTO(
     recommendationId: recommendation.recommendationId,
     productId: recommendation.productId.toString(),
     darkStoreId: recommendation.darkStoreId.toString(),
+    warehouseId: recommendation.warehouseId?.toString(),
     recommendation: recommendation.recommendationType,
     matchedRule: recommendation.matchedRule,
     confidence: recommendation.overallScore,
@@ -83,6 +88,7 @@ export function toRecommendationSnapshotDTO(
     conversionScore: recommendation.conversionScore,
     ratingScore: recommendation.ratingScore,
     availableQuantity: recommendation.availableQuantity,
+    reservedQuantity: recommendation.reservedQuantity ?? undefined,
     warehouseStock: recommendation.warehouseStock,
     summary: recommendation.summary,
     factors: recommendation.factors,

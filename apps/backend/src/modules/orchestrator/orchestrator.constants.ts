@@ -1,0 +1,21 @@
+export const ORCHESTRATOR_ACTIONS = {
+  PURCHASE_ORDER: "PURCHASE_ORDER",
+  WAREHOUSE_TRANSFER: "WAREHOUSE_TRANSFER",
+  CLOSE_RECOMMENDATION: "CLOSE_RECOMMENDATION",
+  IGNORE: "IGNORE",
+} as const;
+
+export const ORCHESTRATOR_STATUSES = {
+  TRIGGERED: "TRIGGERED",
+  COMPLETED: "COMPLETED",
+  SKIPPED: "SKIPPED",
+  FAILED: "FAILED",
+} as const;
+
+export const ORCHESTRATOR_SERVICES = {
+  PURCHASE_ORDER: "PurchaseOrderService",
+  WAREHOUSE_ALLOCATION: "WarehouseAllocationService",
+  WAREHOUSE_TRANSFER: "WarehouseTransferService",
+  RECOMMENDATION: "RecommendationPersistenceService",
+  NONE: "None",
+} as const;

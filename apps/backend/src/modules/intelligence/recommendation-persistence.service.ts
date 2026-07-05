@@ -26,6 +26,7 @@ export class RecommendationPersistenceService {
       ratingScore: signals.ratingScore,
       overallScore: recommendation.confidence,
       availableQuantity: signals.availableQuantity,
+      reservedQuantity: signals.reservedQuantity,
       warehouseStock: signals.warehouseStock,
       summary: explanation.summary,
       factors: explanation.factors,

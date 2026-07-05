@@ -1,5 +1,16 @@
 import { Schema, model, type InferSchemaType } from "mongoose";
 
+export const PURCHASE_ORDER_STATUSES = [
+  "DRAFT",
+  "PENDING_APPROVAL",
+  "APPROVED",
+  "SENT_TO_VENDOR",
+  "RECEIVED",
+  "COMPLETED",
+] as const;
+
+export type PurchaseOrderStatus = (typeof PURCHASE_ORDER_STATUSES)[number];
+
 const purchaseOrderSchema = new Schema(
   {
     purchaseOrderId: {
@@ -9,8 +20,7 @@ const purchaseOrderSchema = new Schema(
       index: true,
     },
     recommendationId: {
-      type: Schema.Types.ObjectId,
-      ref: "Recommendation",
+      type: String,
       required: true,
       index: true,
     },
@@ -33,10 +43,17 @@ const purchaseOrderSchema = new Schema(
       index: true,
     },
     quantity: { type: Number, required: true, min: 1 },
-    orderType: { type: String, required: true, index: true },
-    status: { type: String, required: true, index: true },
-    approvedBy: { type: String, required: true },
-    approvedAt: { type: Date, required: true },
+    orderType: { type: String, required: true, index: true, default: "REPLENISHMENT" },
+    status: {
+      type: String,
+      enum: PURCHASE_ORDER_STATUSES,
+      required: true,
+      index: true,
+      default: "DRAFT",
+    },
+    createdBy: { type: String, required: true, default: "SYSTEM" },
+    approvedBy: { type: String },
+    approvedAt: { type: Date },
     expectedDeliveryDate: { type: Date },
     completedAt: { type: Date },
     remarks: { type: String },

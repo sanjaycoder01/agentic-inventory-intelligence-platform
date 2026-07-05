@@ -61,6 +61,7 @@ const recommendationSchema = new Schema(
     ratingScore: { type: Number, required: true, min: 0, max: 1 },
     overallScore: { type: Number, required: true, min: 0, max: 1 },
     availableQuantity: { type: Number, required: true, min: 0 },
+    reservedQuantity: { type: Number, min: 0 },
     warehouseStock: { type: Number, required: true, min: 0 },
     summary: { type: String, required: true },
     factors: { type: [String], required: true, default: [] },
