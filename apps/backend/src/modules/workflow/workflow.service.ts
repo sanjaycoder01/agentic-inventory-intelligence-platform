@@ -1,4 +1,6 @@
 import { RecommendationType } from "../intelligence/recommendation.types.js";
+import { NOTIFICATION_EVENT_TYPES } from "../notifications/notification.constants.js";
+import { notificationService } from "../notifications/notification.service.js";
 import { purchaseOrderWorkflowService } from "../purchase-orders/purchase-order.service.js";
 import { WAREHOUSE_ALLOCATION_STATUS } from "../warehouse/allocation.constants.js";
 import { warehouseAllocationService } from "../warehouse/allocation.service.js";
@@ -23,44 +25,57 @@ export class WorkflowService {
 
     const validationFailure = this.validateRecommendation(context);
     if (validationFailure) {
-      return validationFailure;
+      return this.withFailureNotification(validationFailure);
     }
+
+    await this.publishRecommendationApproved(context);
 
     context = this.withRecommendedQuantity(context);
 
     const quantityFailure = this.validateRecommendedQuantity(context);
     if (quantityFailure) {
-      return quantityFailure;
+      return this.withFailureNotification(quantityFailure);
     }
 
     try {
       context = await this.withAllocation(context);
     } catch (error) {
-      return this.failed(
-        context,
-        WORKFLOW_STEPS.ALLOCATE_WAREHOUSE,
-        WORKFLOW_FAILURE_REASONS.ALLOCATION_FAILED,
-        error,
+      return this.withFailureNotification(
+        this.failed(
+          context,
+          WORKFLOW_STEPS.ALLOCATE_WAREHOUSE,
+          WORKFLOW_FAILURE_REASONS.ALLOCATION_FAILED,
+          error,
+        ),
       );
     }
 
     const allocationFailure = this.validateAllocation(context);
     if (allocationFailure) {
-      return allocationFailure;
+      return this.withFailureNotification(allocationFailure);
     }
+
+    await this.publishWarehouseAllocated(context);
 
     try {
       context = await this.withPurchaseOrder(context);
     } catch (error) {
-      return this.failed(
-        context,
-        WORKFLOW_STEPS.CREATE_PURCHASE_ORDER,
-        WORKFLOW_FAILURE_REASONS.PURCHASE_ORDER_FAILED,
-        error,
+      return this.withFailureNotification(
+        this.failed(
+          context,
+          WORKFLOW_STEPS.CREATE_PURCHASE_ORDER,
+          WORKFLOW_FAILURE_REASONS.PURCHASE_ORDER_FAILED,
+          error,
+        ),
       );
     }
 
-    return this.completed(context);
+    await this.publishPurchaseOrderCreated(context);
+
+    const result = this.completed(context);
+    await this.publishWorkflowCompleted(result);
+
+    return result;
   }
 
   private validateRecommendation(
@@ -191,6 +206,99 @@ export class WorkflowService {
       failureReason,
       errorMessage: error instanceof Error ? error.message : undefined,
     };
+  }
+
+  private async withFailureNotification(
+    result: WorkflowResult,
+  ): Promise<WorkflowResult> {
+    await notificationService.publish({
+      eventType: NOTIFICATION_EVENT_TYPES.WORKFLOW_FAILED,
+      entityType: "Workflow",
+      entityId: result.recommendationId,
+      payload: {
+        recommendationId: result.recommendationId,
+        currentStep: result.currentStep,
+        failureReason: result.failureReason,
+        errorMessage: result.errorMessage,
+        recommendedQuantity: result.recommendedQuantity,
+        allocation: result.allocation,
+        purchaseOrder: result.purchaseOrder,
+      },
+    });
+
+    return result;
+  }
+
+  private async publishRecommendationApproved(
+    context: WorkflowContext,
+  ): Promise<void> {
+    await notificationService.publish({
+      eventType: NOTIFICATION_EVENT_TYPES.RECOMMENDATION_APPROVED,
+      entityType: "Recommendation",
+      entityId: context.recommendation.recommendationId,
+      payload: {
+        recommendationId: context.recommendation.recommendationId,
+        productId: context.recommendation.productId,
+        darkStoreId: context.recommendation.darkStoreId,
+        recommendation: context.recommendation.recommendation,
+        status: context.recommendation.status,
+      },
+    });
+  }
+
+  private async publishWarehouseAllocated(
+    context: WorkflowContext,
+  ): Promise<void> {
+    await notificationService.publish({
+      eventType: NOTIFICATION_EVENT_TYPES.WAREHOUSE_ALLOCATED,
+      entityType: "Warehouse",
+      entityId: context.allocation!.warehouseId!,
+      payload: {
+        recommendationId: context.recommendation.recommendationId,
+        productId: context.recommendation.productId,
+        darkStoreId: context.recommendation.darkStoreId,
+        warehouseId: context.allocation!.warehouseId,
+        quantity: context.recommendedQuantity,
+        allocatedQuantity: context.allocation!.allocatedQuantity,
+        distanceKm: context.allocation!.distanceKm,
+        allocationStatus: context.allocation!.allocationStatus,
+      },
+    });
+  }
+
+  private async publishPurchaseOrderCreated(
+    context: WorkflowContext,
+  ): Promise<void> {
+    await notificationService.publish({
+      eventType: NOTIFICATION_EVENT_TYPES.PURCHASE_ORDER_CREATED,
+      entityType: "PurchaseOrder",
+      entityId: context.purchaseOrder!.purchaseOrderId,
+      payload: {
+        recommendationId: context.recommendation.recommendationId,
+        purchaseOrderId: context.purchaseOrder!.purchaseOrderId,
+        productId: context.purchaseOrder!.productId,
+        darkStoreId: context.purchaseOrder!.darkStoreId,
+        warehouseId: context.purchaseOrder!.warehouseId,
+        quantity: context.purchaseOrder!.quantity,
+        status: context.purchaseOrder!.status,
+      },
+    });
+  }
+
+  private async publishWorkflowCompleted(
+    result: WorkflowResult,
+  ): Promise<void> {
+    await notificationService.publish({
+      eventType: NOTIFICATION_EVENT_TYPES.WORKFLOW_COMPLETED,
+      entityType: "Workflow",
+      entityId: result.recommendationId,
+      payload: {
+        recommendationId: result.recommendationId,
+        recommendedQuantity: result.recommendedQuantity,
+        allocation: result.allocation,
+        purchaseOrder: result.purchaseOrder,
+      },
+    });
   }
 }
 
