@@ -33,7 +33,7 @@ export function toProductResponseDTO(product: ProductLike): ProductResponseDTO {
     sellingPrice: product.sellingPrice,
     reorderThreshold: product.reorderThreshold,
     safetyStock: product.safetyStock,
-    shelfLifeDays: product.shelfLifeDays,
+    shelfLifeDays: product.shelfLifeDays ?? undefined,
     isActive: product.isActive,
     createdAt: product.createdAt,
     updatedAt: product.updatedAt,

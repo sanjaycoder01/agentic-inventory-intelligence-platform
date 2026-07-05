@@ -12,7 +12,10 @@ export class ProductController {
     sendSuccess(res, 201, PRODUCT_MESSAGES.CREATED, product);
   });
 
-  getProductById = asyncHandler(async (req: Request, res: Response) => {
+  getProductById = asyncHandler(async (
+    req: Request<{ id: string }>,
+    res: Response,
+  ) => {
     const product = await productService.getProductById(req.params.id);
 
     sendSuccess(res, 200, PRODUCT_MESSAGES.RETRIEVED, product);
@@ -24,7 +27,10 @@ export class ProductController {
     sendSuccess(res, 200, PRODUCT_MESSAGES.RETRIEVED_ALL, products);
   });
 
-  updateProduct = asyncHandler(async (req: Request, res: Response) => {
+  updateProduct = asyncHandler(async (
+    req: Request<{ id: string }>,
+    res: Response,
+  ) => {
     const product = await productService.updateProduct(
       req.params.id,
       req.body as UpdateProductDTO,
@@ -33,7 +39,10 @@ export class ProductController {
     sendSuccess(res, 200, PRODUCT_MESSAGES.UPDATED, product);
   });
 
-  deleteProduct = asyncHandler(async (req: Request, res: Response) => {
+  deleteProduct = asyncHandler(async (
+    req: Request<{ id: string }>,
+    res: Response,
+  ) => {
     const product = await productService.deleteProduct(req.params.id);
 
     sendSuccess(res, 200, PRODUCT_MESSAGES.DEACTIVATED, product);

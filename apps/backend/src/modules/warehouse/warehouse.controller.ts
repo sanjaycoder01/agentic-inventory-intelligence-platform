@@ -17,7 +17,10 @@ export class WarehouseController {
     sendSuccess(res, 201, WAREHOUSE_MESSAGES.CREATED, warehouse);
   });
 
-  getWarehouseById = asyncHandler(async (req: Request, res: Response) => {
+  getWarehouseById = asyncHandler(async (
+    req: Request<{ id: string }>,
+    res: Response,
+  ) => {
     const warehouse = await warehouseService.getWarehouseById(req.params.id);
 
     sendSuccess(res, 200, WAREHOUSE_MESSAGES.RETRIEVED, warehouse);
@@ -29,7 +32,10 @@ export class WarehouseController {
     sendSuccess(res, 200, WAREHOUSE_MESSAGES.RETRIEVED_ALL, warehouses);
   });
 
-  updateWarehouse = asyncHandler(async (req: Request, res: Response) => {
+  updateWarehouse = asyncHandler(async (
+    req: Request<{ id: string }>,
+    res: Response,
+  ) => {
     const warehouse = await warehouseService.updateWarehouse(
       req.params.id,
       req.body as UpdateWarehouseDTO,
@@ -38,7 +44,10 @@ export class WarehouseController {
     sendSuccess(res, 200, WAREHOUSE_MESSAGES.UPDATED, warehouse);
   });
 
-  deleteWarehouse = asyncHandler(async (req: Request, res: Response) => {
+  deleteWarehouse = asyncHandler(async (
+    req: Request<{ id: string }>,
+    res: Response,
+  ) => {
     const warehouse = await warehouseService.deleteWarehouse(req.params.id);
 
     sendSuccess(res, 200, WAREHOUSE_MESSAGES.DEACTIVATED, warehouse);

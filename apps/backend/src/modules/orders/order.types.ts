@@ -58,7 +58,7 @@ export function toOrderResponseDTO(order: OrderLike): OrderResponseDTO {
     sellingPrice: order.sellingPrice,
     orderStatus: order.orderStatus,
     orderedAt: order.orderedAt,
-    deliveredAt: order.deliveredAt,
+    deliveredAt: order.deliveredAt ?? undefined,
     sessionId: order.sessionId,
     createdAt: order.createdAt,
   };

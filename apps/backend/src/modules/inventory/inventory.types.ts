@@ -39,7 +39,7 @@ export function toInventoryResponseDTO(
     damagedQuantity: inventory.damagedQuantity,
     averageRating: inventory.averageRating,
     totalRatings: inventory.totalRatings,
-    lastTransferredAt: inventory.lastTransferredAt,
+    lastTransferredAt: inventory.lastTransferredAt ?? undefined,
     createdAt: inventory.createdAt,
     updatedAt: inventory.updatedAt,
   };

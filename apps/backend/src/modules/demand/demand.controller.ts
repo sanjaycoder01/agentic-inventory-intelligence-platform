@@ -12,7 +12,10 @@ export class DemandController {
     sendSuccess(res, 201, DEMAND_MESSAGES.CART_EVENT_RECORDED, event);
   });
 
-  getProductDemand = asyncHandler(async (req: Request, res: Response) => {
+  getProductDemand = asyncHandler(async (
+    req: Request<{ productId: string }>,
+    res: Response,
+  ) => {
     const demand = await demandService.getProductDemand(req.params.productId);
 
     sendSuccess(res, 200, DEMAND_MESSAGES.DEMAND_RETRIEVED, demand);
