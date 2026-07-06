@@ -23,5 +23,10 @@ const inventorySchema = new Schema(
   { timestamps: true },
 );
 
+inventorySchema.index(
+  { darkStoreId: 1, productId: 1 },
+  { unique: true, name: "idx_darkstore_inventory_unique" },
+);
+
 export type InventoryDocument = InferSchemaType<typeof inventorySchema>;
 export const InventoryModel = model("Inventory", inventorySchema);

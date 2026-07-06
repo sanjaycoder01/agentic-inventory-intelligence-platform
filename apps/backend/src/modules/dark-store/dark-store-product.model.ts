@@ -27,7 +27,10 @@ const darkStoreProductSchema = new Schema(
   },
 );
 
-darkStoreProductSchema.index({ darkStoreId: 1, productId: 1 }, { unique: true });
+darkStoreProductSchema.index(
+  { darkStoreId: 1, productId: 1 },
+  { unique: true, name: "idx_darkstore_product_unique" },
+);
 
 export type DarkStoreProductDocument = InferSchemaType<
   typeof darkStoreProductSchema

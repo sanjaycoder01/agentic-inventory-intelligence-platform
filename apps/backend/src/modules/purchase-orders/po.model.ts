@@ -66,6 +66,10 @@ const purchaseOrderSchema = new Schema(
 
 purchaseOrderSchema.index({ status: 1, createdAt: -1 });
 purchaseOrderSchema.index({ warehouseId: 1, darkStoreId: 1, createdAt: -1 });
+purchaseOrderSchema.index(
+  { warehouseId: 1, status: 1, createdAt: -1 },
+  { name: "idx_po_warehouse_status_createdAt" },
+);
 
 export type PurchaseOrderDocument = InferSchemaType<typeof purchaseOrderSchema>;
 export const PurchaseOrderModel = model("PurchaseOrder", purchaseOrderSchema);

@@ -39,6 +39,10 @@ const orderSchema = new Schema(
 );
 
 orderSchema.index({ productId: 1, orderedAt: -1 });
+orderSchema.index(
+  { productId: 1, orderStatus: 1, orderedAt: -1 },
+  { name: "idx_orders_product_status_eventTimestamp" },
+);
 orderSchema.index({ darkStoreId: 1, productId: 1, orderedAt: -1 });
 orderSchema.index({ sessionId: 1, productId: 1 });
 

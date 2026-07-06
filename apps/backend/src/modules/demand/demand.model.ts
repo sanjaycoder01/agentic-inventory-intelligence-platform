@@ -34,7 +34,10 @@ const cartEventSchema = new Schema(
   },
 );
 
-cartEventSchema.index({ productId: 1, eventTimestamp: -1 });
+cartEventSchema.index(
+  { productId: 1, eventTimestamp: -1 },
+  { name: "idx_cart_events_product_eventTimestamp" },
+);
 cartEventSchema.index({ darkStoreId: 1, productId: 1, eventTimestamp: -1 });
 
 export type CartEventDocument = InferSchemaType<typeof cartEventSchema>;

@@ -88,6 +88,10 @@ const recommendationSchema = new Schema(
 recommendationSchema.index({ darkStoreId: 1, generatedAt: -1 });
 recommendationSchema.index({ productId: 1, generatedAt: -1 });
 recommendationSchema.index({ status: 1, generatedAt: -1 });
+recommendationSchema.index(
+  { darkStoreId: 1, status: 1, generatedAt: -1 },
+  { name: "idx_recommendations_darkStore_status_generatedAt" },
+);
 
 export type RecommendationDocument = InferSchemaType<
   typeof recommendationSchema

@@ -31,6 +31,10 @@ const warehouseProductSchema = new Schema(
 );
 
 warehouseProductSchema.index({ warehouseId: 1, productId: 1, batchNumber: 1 });
+warehouseProductSchema.index(
+  { warehouseId: 1, productId: 1 },
+  { unique: true, name: "idx_warehouse_inventory_unique" },
+);
 
 export type WarehouseProductDocument = InferSchemaType<
   typeof warehouseProductSchema
