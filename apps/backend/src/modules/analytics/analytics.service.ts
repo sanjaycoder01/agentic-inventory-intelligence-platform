@@ -5,6 +5,7 @@ import { RatingModel } from "../ratings/rating.model.js";
 import { DarkStoreProductModel } from "../dark-store/dark-store-product.model.js";
 import { RecommendationModel } from "../intelligence/recommendation.model.js";
 import { DarkStoreModel } from "../dark-store/dark-store.model.js";
+import { WarehouseModel } from "../warehouse/warehouse.model.js";
 import { DEMAND_WINDOW_HOURS } from "./analytics.constants.js";
 import type {
   DemandAnalyticsDTO,
@@ -29,6 +30,8 @@ import type {
   RecommendationTrendDTO,
   RecommendationConfidenceDTO,
   DarkStoreDashboardDTO,
+  WarehouseDashboardDTO,
+  ExecutiveDashboardDTO,
 } from "./analytics.types.js";
 import {
   buildDemandAnalyticsPipeline,
@@ -64,6 +67,12 @@ import {
 import {
   buildDarkStoreDashboardPipeline,
 } from "./pipelines/dark-store-dashboard.pipeline.js";
+import {
+  buildWarehouseDashboardPipeline,
+} from "./pipelines/warehouse-dashboard.pipeline.js";
+import {
+  buildExecutiveDashboardPipeline,
+} from "./pipelines/executive-dashboard.pipeline.js";
 
 export class AnalyticsService {
   private getDemandWindowStart(hours = DEMAND_WINDOW_HOURS) {
@@ -228,6 +237,23 @@ export class AnalyticsService {
     const result = await DarkStoreModel.aggregate(
       buildDarkStoreDashboardPipeline(new Types.ObjectId(darkStoreId))
     );
+    return result[0] || null;
+  }
+
+  async getWarehouseDashboard(): Promise<WarehouseDashboardDTO[]> {
+    return WarehouseModel.aggregate(buildWarehouseDashboardPipeline());
+  }
+
+  async getWarehouseDashboardById(warehouseId: string): Promise<WarehouseDashboardDTO> {
+    const result = await WarehouseModel.aggregate(
+      buildWarehouseDashboardPipeline(new Types.ObjectId(warehouseId))
+    );
+    return result[0] || null;
+  }
+
+  async getExecutiveDashboard(): Promise<ExecutiveDashboardDTO> {
+    const since = this.getDemandWindowStart();
+    const result = await CartEventModel.aggregate(buildExecutiveDashboardPipeline(since));
     return result[0] || null;
   }
 }

@@ -7,6 +7,7 @@ import { RatingModel } from "../ratings/rating.model.js";
 import { DarkStoreProductModel } from "../dark-store/dark-store-product.model.js";
 import { RecommendationModel } from "../intelligence/recommendation.model.js";
 import { DarkStoreModel } from "../dark-store/dark-store.model.js";
+import { WarehouseModel } from "../warehouse/warehouse.model.js";
 
 vi.mock("../demand/demand.model.js", () => ({
   CartEventModel: {
@@ -40,6 +41,12 @@ vi.mock("../intelligence/recommendation.model.js", () => ({
 
 vi.mock("../dark-store/dark-store.model.js", () => ({
   DarkStoreModel: {
+    aggregate: vi.fn(),
+  },
+}));
+
+vi.mock("../warehouse/warehouse.model.js", () => ({
+  WarehouseModel: {
     aggregate: vi.fn(),
   },
 }));
@@ -289,6 +296,40 @@ describe("AnalyticsService", () => {
       const mockData = [{ darkStoreId: "store1", totalProducts: 100, availableInventory: 500, reservedInventory: 50, totalOrders: 10, completedOrders: 8, averageRating: 4.5, pendingRecommendations: 5, approvedRecommendations: 2 }];
       vi.mocked(DarkStoreModel.aggregate).mockResolvedValueOnce(mockData);
       const result = await service.getDarkStoreDashboardById(new Types.ObjectId().toString());
+      expect(result).toEqual(mockData[0]);
+    });
+  });
+
+  describe("Warehouse Dashboard", () => {
+    it("should return warehouse dashboard for all warehouses", async () => {
+      const mockData = [{ warehouseId: "w1", warehouseName: "Central Warehouse", totalProducts: 500, totalAvailableInventory: 10000, totalReservedInventory: 500, draftPurchaseOrders: 2, pendingApprovalPurchaseOrders: 1, approvedPurchaseOrders: 3, completedPurchaseOrders: 10, pendingRecommendations: 4, utilizationPercentage: 85 }];
+      vi.mocked(WarehouseModel.aggregate).mockResolvedValueOnce(mockData);
+      const result = await service.getWarehouseDashboard();
+      expect(result).toEqual(mockData);
+    });
+
+    it("should return warehouse dashboard by id", async () => {
+      const mockData = [{ warehouseId: "w1", warehouseName: "Central Warehouse", totalProducts: 500, totalAvailableInventory: 10000, totalReservedInventory: 500, draftPurchaseOrders: 2, pendingApprovalPurchaseOrders: 1, approvedPurchaseOrders: 3, completedPurchaseOrders: 10, pendingRecommendations: 4, utilizationPercentage: 85 }];
+      vi.mocked(WarehouseModel.aggregate).mockResolvedValueOnce(mockData);
+      const result = await service.getWarehouseDashboardById(new Types.ObjectId().toString());
+      expect(result).toEqual(mockData[0]);
+    });
+  });
+
+  describe("Executive Dashboard", () => {
+    it("should return executive dashboard", async () => {
+      const mockData = [{
+        generatedAt: new Date(),
+        demand: { totalCartAdds: 100, totalCartRemoves: 20, trendingProducts: [] },
+        orders: { totalOrders: 50, completedOrders: 40, cancelledOrders: 10, conversionRate: 0.8 },
+        ratings: { averageRating: 4.5, totalRatings: 100, ratingDistribution: { oneStar: 0, twoStar: 0, threeStar: 0, fourStar: 0, fiveStar: 0 } },
+        inventory: { lowStock: 5, outOfStock: 2, overStock: 10, inventoryHealth: 0.9 },
+        recommendations: { pending: 10, approved: 5, rejected: 2, reorder: 8, returnToWarehouse: 2 },
+        purchaseOrders: { draft: 5, pendingApproval: 2, approved: 3, completed: 10 },
+        notifications: { pending: 0, sent: 100, failed: 1 },
+      }];
+      vi.mocked(CartEventModel.aggregate).mockResolvedValueOnce(mockData);
+      const result = await service.getExecutiveDashboard();
       expect(result).toEqual(mockData[0]);
     });
   });

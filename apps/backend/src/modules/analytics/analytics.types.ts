@@ -155,3 +155,67 @@ export interface DarkStoreDashboardDTO {
   pendingRecommendations: number;
   approvedRecommendations: number;
 }
+
+export interface WarehouseDashboardDTO {
+  warehouseId: string;
+  warehouseName: string;
+  totalProducts: number;
+  totalAvailableInventory: number;
+  totalReservedInventory: number;
+  draftPurchaseOrders: number;
+  pendingApprovalPurchaseOrders: number;
+  approvedPurchaseOrders: number;
+  completedPurchaseOrders: number;
+  pendingRecommendations: number;
+  utilizationPercentage: number;
+}
+
+export interface ExecutiveDashboardDTO {
+  generatedAt: Date;
+  demand: {
+    totalCartAdds: number;
+    totalCartRemoves: number;
+    trendingProducts: any[];
+  };
+  orders: {
+    totalOrders: number;
+    completedOrders: number;
+    cancelledOrders: number;
+    conversionRate: number;
+  };
+  ratings: {
+    averageRating: number;
+    totalRatings: number;
+    ratingDistribution: {
+      oneStar: number;
+      twoStar: number;
+      threeStar: number;
+      fourStar: number;
+      fiveStar: number;
+    };
+  };
+  inventory: {
+    lowStock: number;
+    outOfStock: number;
+    overStock: number;
+    inventoryHealth: number;
+  };
+  recommendations: {
+    pending: number;
+    approved: number;
+    rejected: number;
+    reorder: number;
+    returnToWarehouse: number;
+  };
+  purchaseOrders: {
+    draft: number;
+    pendingApproval: number;
+    approved: number;
+    completed: number;
+  };
+  notifications: {
+    pending: number;
+    sent: number;
+    failed: number;
+  };
+}
