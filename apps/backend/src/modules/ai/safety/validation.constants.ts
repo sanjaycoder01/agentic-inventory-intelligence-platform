@@ -1,0 +1,3 @@
+export const SAFETY_CONSTANTS = {
+  MAX_PROMPT_LENGTH: 10000,
+};
