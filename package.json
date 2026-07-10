@@ -4,7 +4,8 @@
   "private": true,
   "description": "Agentic inventory intelligence platform — modular monorepo",
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "event-simulator"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
@@ -19,5 +20,8 @@
   },
   "engines": {
     "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-sqs": "^3.1084.0"
   }
 }

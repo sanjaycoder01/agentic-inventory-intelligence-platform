@@ -1,0 +1,23 @@
+{
+  "name": "@aiip/event-simulator",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Simulation event pipeline with swappable memory/SQS queue",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "queue:consumer": "tsx src/queue/worker.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-sqs": "^3.712.0",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
+    "vitest": "^2.1.8"
+  }
+}

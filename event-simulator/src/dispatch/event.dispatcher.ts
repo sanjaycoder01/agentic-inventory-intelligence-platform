@@ -33,6 +33,8 @@ export interface EventDispatchResult {
 }
 
 export class EventDispatcher {
+  private readonly processedEvents = new Set<string>();
+
   constructor(private readonly backendClient: BackendClientPort) {}
 
   async dispatch(
@@ -42,6 +44,20 @@ export class EventDispatcher {
     const results: EventDispatchResult[] = [];
 
     for (const event of eventList) {
+      const eventId = event.eventId;
+      if (eventId) {
+        if (this.processedEvents.has(eventId)) {
+          results.push({
+            simulationRunId: event.simulationRunId,
+            type: event.type,
+            result: { success: true, status: 200, response: { message: "Already processed" } },
+            dispatchedAt: new Date(),
+          });
+          continue;
+        }
+        this.processedEvents.add(eventId);
+      }
+
       const result = await this.dispatchOne(event);
 
       results.push({

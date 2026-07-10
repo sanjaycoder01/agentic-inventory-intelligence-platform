@@ -35,6 +35,9 @@ export class EventScheduler implements EventSchedulerPort {
 
   async waitUntilComplete(): Promise<void> {
     await this.loopPromise;
+    if (typeof (this.pipeline as any).waitForAll === 'function') {
+      await (this.pipeline as any).waitForAll();
+    }
   }
 
   isRunning(): boolean {
