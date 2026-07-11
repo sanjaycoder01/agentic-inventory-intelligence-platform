@@ -11,6 +11,14 @@ const envSchema = z.object({
     .default("mongodb://localhost:27017/inventory_intelligence"),
   AWS_REGION: z.string().min(1).default("us-east-1"),
   ANTHROPIC_API_KEY: z.string().optional().default(""),
+  /** Cron B — recommendation engine. Default: enabled in non-test envs. */
+  RECOMMENDATION_CRON_ENABLED: z
+    .enum(["true", "false"])
+    .optional()
+    .default("true"),
+  /** Default: every 5 minutes */
+  RECOMMENDATION_CRON_EXPRESSION: z.string().optional().default("*/5 * * * *"),
+  RECOMMENDATION_CRON_DARK_STORE_ID: z.string().optional(),
 });
 
 function loadConfig() {
@@ -25,6 +33,10 @@ function loadConfig() {
   }
 
   const env = result.data;
+  const cronEnabled =
+    env.NODE_ENV === "test"
+      ? false
+      : env.RECOMMENDATION_CRON_ENABLED === "true";
 
   return {
     port: env.PORT,
@@ -34,6 +46,11 @@ function loadConfig() {
       region: env.AWS_REGION,
     },
     anthropicApiKey: env.ANTHROPIC_API_KEY,
+    recommendationCron: {
+      enabled: cronEnabled,
+      expression: env.RECOMMENDATION_CRON_EXPRESSION,
+      darkStoreId: env.RECOMMENDATION_CRON_DARK_STORE_ID || undefined,
+    },
   } as const;
 }
 

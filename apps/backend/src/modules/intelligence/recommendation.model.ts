@@ -15,6 +15,7 @@ export type RecommendationType = (typeof RECOMMENDATION_TYPES)[number];
 
 export const RECOMMENDATION_STATUSES = [
   "PENDING",
+  "BLOCKED",
   "APPROVED",
   "REJECTED",
   "EXPIRED",

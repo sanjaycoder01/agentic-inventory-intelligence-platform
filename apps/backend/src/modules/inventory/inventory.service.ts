@@ -10,6 +10,7 @@ import { DarkStoreModel } from "../dark-store/dark-store.model.js";
 import { ProductModel } from "../products/product.model.js";
 import { InventoryPolicyModel } from "./inventory-policy.model.js";
 import { INVENTORY_ERRORS, INVENTORY_LOG } from "./inventory.constants.js";
+import { stockLedgerService } from "./stock-ledger.service.js";
 import {
   toInventoryResponseDTO,
   toInventoryResponseList,
@@ -87,6 +88,15 @@ export class InventoryService {
       inventoryId: inventory._id.toString(),
     });
 
+    await stockLedgerService.append({
+      productId,
+      darkStoreId,
+      change: quantity,
+      balanceAfter: inventory.availableQuantity,
+      reason: "RESTOCK",
+      source: "SYSTEM",
+    });
+
     return toInventoryResponseDTO(inventory);
   }
 
@@ -130,6 +140,15 @@ export class InventoryService {
     }
 
     logger.info(INVENTORY_LOG.STOCK_RESERVED, { darkStoreId, productId, quantity });
+
+    await stockLedgerService.append({
+      productId,
+      darkStoreId,
+      change: -quantity,
+      balanceAfter: inventory.availableQuantity,
+      reason: "RESERVE",
+      source: "SYSTEM",
+    });
 
     return toInventoryResponseDTO(inventory);
   }
@@ -175,6 +194,15 @@ export class InventoryService {
 
     logger.info(INVENTORY_LOG.STOCK_RELEASED, { darkStoreId, productId, quantity });
 
+    await stockLedgerService.append({
+      productId,
+      darkStoreId,
+      change: quantity,
+      balanceAfter: inventory.availableQuantity,
+      reason: "RELEASE",
+      source: "SYSTEM",
+    });
+
     return toInventoryResponseDTO(inventory);
   }
 
@@ -215,6 +243,16 @@ export class InventoryService {
     }
 
     logger.info(INVENTORY_LOG.STOCK_DEDUCTED, { darkStoreId, productId, quantity });
+
+    await stockLedgerService.append({
+      productId,
+      darkStoreId,
+      change: 0,
+      balanceAfter: inventory.availableQuantity,
+      reason: "SALE",
+      source: "SYSTEM",
+      note: "Reserved stock converted to sale",
+    });
 
     return toInventoryResponseDTO(inventory);
   }
@@ -259,6 +297,15 @@ export class InventoryService {
     }
 
     logger.info(INVENTORY_LOG.STOCK_MARKED_DAMAGED, { darkStoreId, productId, quantity });
+
+    await stockLedgerService.append({
+      productId,
+      darkStoreId,
+      change: -quantity,
+      balanceAfter: inventory.availableQuantity,
+      reason: "DAMAGE",
+      source: "HUMAN",
+    });
 
     return toInventoryResponseDTO(inventory);
   }

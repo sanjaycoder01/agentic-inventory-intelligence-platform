@@ -46,6 +46,13 @@ vi.mock("./inventory-policy.model.js", () => ({
   },
 }));
 
+vi.mock("./stock-ledger.service.js", () => ({
+  stockLedgerService: {
+    append: vi.fn().mockResolvedValue({}),
+    listByProduct: vi.fn().mockResolvedValue([]),
+  },
+}));
+
 function createInventoryDoc(overrides: Record<string, unknown> = {}) {
   const now = new Date("2026-07-02T00:00:00.000Z");
 

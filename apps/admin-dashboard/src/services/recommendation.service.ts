@@ -5,6 +5,10 @@ export const recommendationService = {
     const res = await api.get('/recommendations');
     return res.data;
   },
+  generate: async (params?: { productId?: string; darkStoreId?: string }) => {
+    const res = await api.post('/recommendations/generate', params ?? {});
+    return res.data;
+  },
   approve: async (id: string, approvedBy?: string) => {
     const res = await api.post(`/recommendations/${id}/approve`, { approvedBy });
     return res.data;

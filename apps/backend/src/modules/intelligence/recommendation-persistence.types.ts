@@ -16,6 +16,8 @@ export interface SaveRecommendationInput {
   eligibility: EligibilityResult;
   recommendation: RecommendationResult;
   explanation: ExplanationResult;
+  status?: RecommendationStatus;
+  recommendedQuantity?: number;
 }
 
 export interface RecommendationSnapshotDTO {

@@ -60,10 +60,27 @@ npm run seed
 |--------|-----------|
 | `/api/demand` | `POST /cart`, `POST /order`, `POST /rating` |
 | `/api/inventory` | `GET /`, `GET /:productId` |
-| `/api/intelligence` | `GET /recommendations`, `GET /recommendations/:productId` |
+| `/api/v1/recommendations` | `GET /`, `POST /generate`, `GET /:id`, `POST /:id/approve`, `POST /:id/reject` |
 | `/api/warehouse` | `GET /stock`, `GET /fulfillment/:productId` |
 | `/api/purchase-orders` | `GET /`, `POST /`, `POST /:id/approve`, `POST /:id/reject` |
 | `/api/assistant` | `POST /chat`, `GET /tools` |
+
+## Recommendation cron (Pipeline 3)
+
+On startup the backend schedules Cron B (`node-cron`, every 5 minutes by default) to regenerate recommendations from Mongo signals. Configure via `RECOMMENDATION_CRON_*` in `.env` (see `.env.example`). Disable with `RECOMMENDATION_CRON_ENABLED=false`. Manual trigger remains `POST /api/v1/recommendations/generate`.
+
+### Phase 1 intelligence extras
+
+| Endpoint | Purpose |
+|----------|---------|
+| `POST /api/v1/recommendations/generate` | Run intelligence pipeline |
+| `GET /api/v1/recommendations/history` | Recommendation history (incl. EXPIRED) |
+| `GET /api/v1/recommendations/decisions/:productId` | `agentDecisions` audit trail |
+| `POST /api/v1/assistant/chat` | Read-only Claude assistant |
+| `GET /api/v1/stock-ledger?productId=` | Append-only stock movements |
+| `POST /api/v1/returns` | Create return-to-warehouse order |
+
+Set `ANTHROPIC_API_KEY` for live Claude explanations and assistant replies (templates/mocks used otherwise).
 
 ## Documentation
 

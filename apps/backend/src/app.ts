@@ -1,3 +1,4 @@
+import { Router } from "express";
 import cors from "cors";
 import express, { type Express } from "express";
 import {
@@ -12,12 +13,14 @@ import {
 import { orderRouter } from "./modules/orders/order.routes.js";
 import { ratingRouter } from "./modules/ratings/rating.routes.js";
 import { warehouseRouter } from "./modules/warehouse/warehouse.routes.js";
-
 import { poRouter } from "./modules/purchase-orders/po.routes.js";
 import { intelligenceRouter } from "./modules/intelligence/intelligence.routes.js";
 import { analyticsRouter } from "./modules/analytics/analytics.routes.js";
 import { aiRouter } from "./modules/ai/ai.routes.js";
 import { notificationRouter } from "./modules/notifications/notification.routes.js";
+import { returnsRouter } from "./modules/returns/returns.routes.js";
+import { assistantRouter } from "./modules/assistant/assistant.routes.js";
+import { stockLedgerService } from "./modules/inventory/stock-ledger.service.js";
 
 export function createApp(): Express {
   const app = express();
@@ -39,6 +42,28 @@ export function createApp(): Express {
     }
   });
 
+  const stockLedgerRouter = Router();
+  stockLedgerRouter.get("/", async (req, res, next) => {
+    try {
+      const productId = String(req.query.productId ?? "");
+      if (!productId) {
+        res.status(400).json({ error: "productId is required" });
+        return;
+      }
+      const darkStoreId =
+        typeof req.query.darkStoreId === "string"
+          ? req.query.darkStoreId
+          : undefined;
+      const entries = await stockLedgerService.listByProduct(
+        productId,
+        darkStoreId,
+      );
+      res.json({ success: true, data: entries });
+    } catch (err) {
+      next(err);
+    }
+  });
+
   app.use("/api/v1/products", productRouter);
   app.use("/api/v1/warehouses", warehouseRouter);
   app.use("/api/v1/cart-events", cartEventRouter);
@@ -49,7 +74,10 @@ export function createApp(): Express {
   app.use("/api/v1/recommendations", intelligenceRouter);
   app.use("/api/v1/analytics", analyticsRouter);
   app.use("/api/v1/ai", aiRouter);
+  app.use("/api/v1/assistant", assistantRouter);
   app.use("/api/v1/notifications", notificationRouter);
+  app.use("/api/v1/returns", returnsRouter);
+  app.use("/api/v1/stock-ledger", stockLedgerRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

@@ -16,12 +16,13 @@ export class RecommendationPersistenceService {
     const { signals, eligibility, recommendation, explanation } = input;
 
     const recommendedQuantity =
-      recommendation.recommendation === RecommendationType.REORDER
+      input.recommendedQuantity ??
+      (recommendation.recommendation === RecommendationType.REORDER
         ? calculateReorderQuantity({
             cartCount: signals.cartCount24h ?? 0,
             windowHours: signals.windowHours,
           })
-        : undefined;
+        : undefined);
 
     const overallScore =
       eligibility.replenishmentScore ??
@@ -46,7 +47,7 @@ export class RecommendationPersistenceService {
       summary: explanation.summary,
       factors: explanation.factors,
       recommendedQuantity,
-      status: "PENDING",
+      status: input.status ?? "PENDING",
       generatedAt: new Date(),
     });
 
@@ -66,10 +67,44 @@ export class RecommendationPersistenceService {
 
   async getPendingRecommendations(): Promise<RecommendationSnapshotDTO[]> {
     const recommendations = await RecommendationModel.find({
-      status: "PENDING",
+      status: { $in: ["PENDING", "BLOCKED"] },
     }).sort({ generatedAt: -1 });
 
     return recommendations.map(toRecommendationSnapshotDTO);
+  }
+
+  async getRecommendationHistory(
+    productId?: string,
+    darkStoreId?: string,
+    limit = 50,
+  ): Promise<RecommendationSnapshotDTO[]> {
+    const filter: Record<string, unknown> = {};
+    if (productId) filter.productId = productId;
+    if (darkStoreId) filter.darkStoreId = darkStoreId;
+
+    const recommendations = await RecommendationModel.find(filter)
+      .sort({ generatedAt: -1 })
+      .limit(limit);
+
+    return recommendations.map(toRecommendationSnapshotDTO);
+  }
+
+  async expirePendingForProduct(
+    productId: string,
+    darkStoreId: string,
+  ): Promise<boolean> {
+    const result = await RecommendationModel.updateMany(
+      {
+        productId,
+        darkStoreId,
+        status: "PENDING",
+      },
+      {
+        status: "EXPIRED",
+      },
+    );
+
+    return result.modifiedCount > 0;
   }
 
   async approveRecommendation(
@@ -112,9 +147,15 @@ export class RecommendationPersistenceService {
       throw new NotFoundError(`Recommendation ${recommendationId} not found`);
     }
 
-    if (existing.status !== "PENDING") {
+    if (existing.status !== "PENDING" && existing.status !== "BLOCKED") {
       throw new ValidationError(
         `Recommendation ${recommendationId} is already ${existing.status}`,
+      );
+    }
+
+    if (update.status === "APPROVED" && existing.status === "BLOCKED") {
+      throw new ValidationError(
+        `Blocked recommendation ${recommendationId} cannot be approved`,
       );
     }
 
