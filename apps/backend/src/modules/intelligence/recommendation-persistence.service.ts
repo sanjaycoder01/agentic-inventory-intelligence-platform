@@ -1,6 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { NotFoundError, ValidationError } from "../../middleware/app-errors.js";
 import { RecommendationModel } from "./recommendation.model.js";
+import { RecommendationType } from "./recommendation.types.js";
+import { calculateReorderQuantity } from "./scoring.js";
 import type {
   RecommendationSnapshotDTO,
   SaveRecommendationInput,
@@ -13,6 +15,19 @@ export class RecommendationPersistenceService {
   ): Promise<RecommendationSnapshotDTO> {
     const { signals, eligibility, recommendation, explanation } = input;
 
+    const recommendedQuantity =
+      recommendation.recommendation === RecommendationType.REORDER
+        ? calculateReorderQuantity({
+            cartCount: signals.cartCount24h ?? 0,
+            windowHours: signals.windowHours,
+          })
+        : undefined;
+
+    const overallScore =
+      eligibility.replenishmentScore ??
+      signals.replenishmentScore ??
+      recommendation.confidence;
+
     const savedRecommendation = await RecommendationModel.create({
       recommendationId: randomUUID(),
       productId: signals.productId,
@@ -24,12 +39,13 @@ export class RecommendationPersistenceService {
       demandScore: signals.demandScore,
       conversionScore: signals.conversionScore,
       ratingScore: signals.ratingScore,
-      overallScore: recommendation.confidence,
+      overallScore,
       availableQuantity: signals.availableQuantity,
       reservedQuantity: signals.reservedQuantity,
       warehouseStock: signals.warehouseStock,
       summary: explanation.summary,
       factors: explanation.factors,
+      recommendedQuantity,
       status: "PENDING",
       generatedAt: new Date(),
     });

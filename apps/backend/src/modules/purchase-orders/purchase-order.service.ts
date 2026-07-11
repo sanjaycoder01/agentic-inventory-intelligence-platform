@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { NotFoundError, ValidationError } from "../../middleware/app-errors.js";
+import { calculateReorderQuantity } from "../intelligence/scoring.js";
 import { PURCHASE_ORDER_DEFAULTS } from "./purchase-order.constants.js";
 import { PurchaseOrderModel } from "./po.model.js";
 import type {
@@ -13,7 +14,12 @@ export class PurchaseOrderWorkflowService {
   getRecommendedQuantity(
     recommendation: Pick<
       PurchaseOrderRecommendationInput,
-      "availableQuantity" | "reservedQuantity"
+      | "availableQuantity"
+      | "reservedQuantity"
+      | "recommendedQuantity"
+      | "cartCount24h"
+      | "windowHours"
+      | "quantity"
     >,
   ): number {
     return this.calculateRecommendedQuantity(recommendation);
@@ -67,12 +73,35 @@ export class PurchaseOrderWorkflowService {
     return purchaseOrders.map(toPurchaseOrderResponseDTO);
   }
 
+  /**
+   * Prefer precomputed PRD qty, else demandRate × leadTime × buffer,
+   * else legacy target-stock gap (backward compatible).
+   */
   private calculateRecommendedQuantity(
     recommendation: Pick<
       PurchaseOrderRecommendationInput,
-      "availableQuantity" | "reservedQuantity"
+      | "availableQuantity"
+      | "reservedQuantity"
+      | "recommendedQuantity"
+      | "cartCount24h"
+      | "windowHours"
+      | "quantity"
     >,
   ): number {
+    if (
+      recommendation.recommendedQuantity != null &&
+      recommendation.recommendedQuantity > 0
+    ) {
+      return recommendation.recommendedQuantity;
+    }
+
+    if (recommendation.cartCount24h != null) {
+      return calculateReorderQuantity({
+        cartCount: recommendation.cartCount24h,
+        windowHours: recommendation.windowHours,
+      });
+    }
+
     const currentStock =
       recommendation.availableQuantity + (recommendation.reservedQuantity ?? 0);
 

@@ -47,6 +47,9 @@ export class RecommendationOrchestratorService {
     const quantity = purchaseOrderWorkflowService.getRecommendedQuantity({
       availableQuantity: recommendation.availableQuantity,
       reservedQuantity: recommendation.reservedQuantity,
+      recommendedQuantity: recommendation.recommendedQuantity,
+      cartCount24h: recommendation.cartCount24h,
+      windowHours: recommendation.windowHours,
     });
 
     if (quantity <= 0) {
@@ -84,6 +87,9 @@ export class RecommendationOrchestratorService {
       quantity,
       availableQuantity: recommendation.availableQuantity,
       reservedQuantity: recommendation.reservedQuantity,
+      recommendedQuantity: recommendation.recommendedQuantity,
+      cartCount24h: recommendation.cartCount24h,
+      windowHours: recommendation.windowHours,
     });
 
     return {

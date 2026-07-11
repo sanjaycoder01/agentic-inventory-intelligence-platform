@@ -108,6 +108,9 @@ export class WorkflowService {
       recommendedQuantity: purchaseOrderWorkflowService.getRecommendedQuantity({
         availableQuantity: context.recommendation.availableQuantity,
         reservedQuantity: context.recommendation.reservedQuantity,
+        recommendedQuantity: context.recommendation.recommendedQuantity,
+        cartCount24h: context.recommendation.cartCount24h,
+        windowHours: context.recommendation.windowHours,
       }),
     };
   }
@@ -174,6 +177,9 @@ export class WorkflowService {
       quantity: context.recommendedQuantity,
       availableQuantity: context.recommendation.availableQuantity,
       reservedQuantity: context.recommendation.reservedQuantity,
+      recommendedQuantity: context.recommendation.recommendedQuantity,
+      cartCount24h: context.recommendation.cartCount24h,
+      windowHours: context.recommendation.windowHours,
     });
 
     return { ...context, purchaseOrder };

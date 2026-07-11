@@ -13,6 +13,11 @@ export interface PurchaseOrderRecommendationInput {
   quantity?: number;
   availableQuantity: number;
   reservedQuantity?: number;
+  /** Precomputed PRD qty (demand × lead time × buffer) */
+  recommendedQuantity?: number;
+  /** Cart-add volume for demand-rate qty when recommendedQuantity is absent */
+  cartCount24h?: number;
+  windowHours?: number;
 }
 
 export interface PurchaseOrderResponseDTO {

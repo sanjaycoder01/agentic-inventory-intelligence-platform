@@ -7,7 +7,7 @@ export const explanationTemplates: Record<
 > = {
   RULE_REORDER: {
     summary:
-      "Inventory is running low while demand, conversion, and ratings remain strong. Warehouse stock is available, so replenishment is recommended.",
+      "Overall replenishment score cleared the threshold with low store stock and available warehouse inventory, so a reorder is recommended.",
   },
   RULE_DO_NOT_REORDER_LOW_CONVERSION: {
     summary:

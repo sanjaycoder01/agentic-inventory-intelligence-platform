@@ -33,6 +33,9 @@ export interface RecommendationSnapshotDTO {
   availableQuantity: number;
   reservedQuantity?: number;
   warehouseStock: number;
+  recommendedQuantity?: number;
+  cartCount24h?: number;
+  windowHours?: number;
   summary: string;
   factors: string[];
   status: RecommendationStatus;
@@ -60,6 +63,7 @@ type RecommendationLike = RecommendationDocument & {
   availableQuantity: number;
   reservedQuantity?: number | null;
   warehouseStock: number;
+  recommendedQuantity?: number | null;
   summary: string;
   factors: string[];
   status: RecommendationStatus;
@@ -90,6 +94,7 @@ export function toRecommendationSnapshotDTO(
     availableQuantity: recommendation.availableQuantity,
     reservedQuantity: recommendation.reservedQuantity ?? undefined,
     warehouseStock: recommendation.warehouseStock,
+    recommendedQuantity: recommendation.recommendedQuantity ?? undefined,
     summary: recommendation.summary,
     factors: recommendation.factors,
     status: recommendation.status,

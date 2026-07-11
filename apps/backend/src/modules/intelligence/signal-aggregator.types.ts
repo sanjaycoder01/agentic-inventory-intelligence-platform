@@ -4,6 +4,11 @@ export interface ProductSignals {
   demandScore: number;
   conversionScore: number;
   ratingScore: number;
+  /** Weighted overall replenishment score (0–1) */
+  replenishmentScore: number;
+  /** Cart-add volume in the demand window — used for reorder qty */
+  cartCount24h: number;
+  windowHours: number;
   availableQuantity: number;
   reservedQuantity: number;
   warehouseStock: number;
@@ -14,6 +19,11 @@ export interface ProductSignals {
 export interface SignalAggregatorDependencies {
   demandService: {
     getDemandScore(productId: string): Promise<number>;
+    getProductDemand(productId: string): Promise<{
+      cartCount24h: number;
+      demandScore: number;
+      windowHours: number;
+    }>;
   };
   orderService: {
     getConversionScore(productId: string): Promise<{

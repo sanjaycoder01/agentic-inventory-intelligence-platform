@@ -26,15 +26,14 @@ function inventoryConfidence(
 ): number {
   const inventoryPressure = eligibility.checks.inventoryLow ? 1 : 0;
   const warehouseReadiness = eligibility.checks.warehouseHasStock ? 1 : 0;
+  const scoreGate = eligibility.checks.scoreAboveThreshold ? 1 : 0;
+  const replenishmentScore =
+    eligibility.replenishmentScore ??
+    signals.replenishmentScore ??
+    (signals.demandScore + signals.conversionScore + signals.ratingScore) / 3;
 
   return roundConfidence(
-    (
-      signals.demandScore +
-      signals.conversionScore +
-      signals.ratingScore +
-      inventoryPressure +
-      warehouseReadiness
-    ) / 5,
+    (replenishmentScore + inventoryPressure + warehouseReadiness + scoreGate) / 4,
   );
 }
 
@@ -43,6 +42,10 @@ function noActionReasons(eligibility: EligibilityResult): RecommendationReason[]
 
   if (!eligibility.eligible) {
     reasons.push("NOT_ELIGIBLE");
+  }
+
+  if (!eligibility.checks.scoreAboveThreshold) {
+    reasons.push("SCORE_BELOW_THRESHOLD");
   }
 
   if (!eligibility.checks.warehouseHasStock) {
@@ -67,17 +70,14 @@ function noActionReasons(eligibility: EligibilityResult): RecommendationReason[]
 export const recommendationRules: RecommendationRule[] = [
   {
     id: "RULE_REORDER",
-    matches: (_signals, eligibility) =>
-      eligibility.checks.inventoryLow &&
-      eligibility.checks.warehouseHasStock &&
-      eligibility.checks.demandHealthy &&
-      eligibility.checks.conversionHealthy &&
-      eligibility.checks.ratingHealthy,
+    // PRD hard gate: overall score clears threshold + low stock + warehouse can fulfill
+    matches: (_signals, eligibility) => eligibility.eligible,
     buildResult: (signals, eligibility) => ({
       recommendation: RecommendationType.REORDER,
       confidence: inventoryConfidence(signals, eligibility),
       matchedRule: "RULE_REORDER",
       reasons: [
+        "SCORE_ABOVE_THRESHOLD",
         "LOW_INVENTORY",
         "WAREHOUSE_STOCK_AVAILABLE",
         "HIGH_DEMAND",
