@@ -29,6 +29,16 @@ export function createApp(): Express {
     res.json({ status: "ok" });
   });
 
+  app.get("/api/v1/dark-stores", async (_req, res, next) => {
+    try {
+      const { DarkStoreModel } = await import("./modules/dark-store/dark-store.model.js");
+      const stores = await DarkStoreModel.find({ status: "ACTIVE" });
+      res.json({ success: true, data: stores });
+    } catch (err) {
+      next(err);
+    }
+  });
+
   app.use("/api/v1/products", productRouter);
   app.use("/api/v1/warehouses", warehouseRouter);
   app.use("/api/v1/cart-events", cartEventRouter);

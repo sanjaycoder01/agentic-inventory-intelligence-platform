@@ -23,10 +23,20 @@ export class SqsConsumer {
 
         if (success) {
           await sqsClientWrapper.deleteMessage(msg.ReceiptHandle);
+          console.log(`[Deleted] messageId=${msg.MessageId} eventId=${event.eventId}`);
           queueMetricsService.recordProcessed();
           queueMetricsService.recordDeleted();
           logQueueEvent('Deleted', { eventId: event.eventId, messageId: msg.MessageId, simulationRunId: event.simulationRunId, eventType: event.type });
         } else {
+          const failures = results.filter(r => !r.result.success);
+          console.error(JSON.stringify({
+            action: "Failed",
+            eventId: event.eventId,
+            messageId: msg.MessageId,
+            simulationRunId: event.simulationRunId,
+            eventType: event.type,
+            error: failures.map(f => (f.result as any).error || JSON.stringify(f.result.response || f.result)).join("; "),
+          }));
           queueMetricsService.recordFailed();
           queueMetricsService.recordRetry();
           logQueueEvent('Failed', { eventId: event.eventId, messageId: msg.MessageId, simulationRunId: event.simulationRunId, eventType: event.type, details: 'dispatch failed' });
@@ -34,7 +44,13 @@ export class SqsConsumer {
       } catch (err: any) {
         queueMetricsService.recordFailed();
         queueMetricsService.recordRetry();
-        logQueueEvent('Failed', { eventId: undefined, messageId: msg.MessageId, simulationRunId: undefined, eventType: undefined, details: err.message });
+        logQueueEvent('Failed', {
+          eventId: undefined,
+          messageId: msg.MessageId,
+          simulationRunId: undefined,
+          eventType: undefined,
+          details: err instanceof Error ? err.stack || err.message : String(err),
+        });
       }
     }
     return messages.length;

@@ -11,6 +11,8 @@ import type {
   SelectedProduct,
 } from "./context.types.js";
 
+const loggedScenarioFallbacks = new Set<string>();
+
 export function selectProductForCustomer(
   scenario: Scenario,
   customer: Customer,
@@ -55,13 +57,52 @@ function filterScenarioProducts(
     return products;
   }
 
-  return products.filter((product) =>
-    scenario.targetProducts.some(
-      (target) =>
-        product.productId === target ||
-        product.productName === target ||
-        product.category === target,
+  const matched = products.filter((product) =>
+    scenario.targetProducts.some((target) =>
+      matchesProductTarget(product, target),
     ),
+  );
+
+  if (matched.length === 0 && products.length > 0) {
+    const fallbackKey = `${scenario.id}:${scenario.targetProducts.join(",")}:${products.length}`;
+    if (!loggedScenarioFallbacks.has(fallbackKey)) {
+      loggedScenarioFallbacks.add(fallbackKey);
+      console.warn(
+        JSON.stringify({
+          action: "ScenarioProductFallback",
+          scenarioId: scenario.id,
+          scenarioTargets: scenario.targetProducts,
+          catalogProductCount: products.length,
+          sampleProductNames: products
+            .slice(0, 5)
+            .map((product) => product.productName),
+          message:
+            "No catalog products matched scenario targets; using full catalog.",
+        }),
+      );
+    }
+    return products;
+  }
+
+  return matched;
+}
+
+function matchesProductTarget(
+  product: DarkStoreCatalogProduct,
+  target: string,
+): boolean {
+  if (product.productId === target) {
+    return true;
+  }
+
+  const normalizedTarget = target.trim().toLowerCase();
+  const normalizedName = product.productName.trim().toLowerCase();
+  const normalizedCategory = product.category.trim().toLowerCase();
+
+  return (
+    normalizedName === normalizedTarget ||
+    normalizedCategory === normalizedTarget ||
+    normalizedName.includes(normalizedTarget)
   );
 }
 
