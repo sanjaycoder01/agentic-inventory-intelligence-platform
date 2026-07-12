@@ -9,7 +9,8 @@ import {
   Bell,
   BarChart3,
   Bot,
-  Settings
+  Settings,
+  TrendingUp,
 } from 'lucide-react';
 
 const menuItems = [
@@ -17,6 +18,7 @@ const menuItems = [
   { label: 'Inventory', href: '/inventory', icon: PackageSearch },
   { label: 'Products', href: '/products', icon: Package },
   { label: 'Recommendations', href: '/recommendations', icon: Lightbulb },
+  { label: 'Sales Optimization', href: '/dashboard/sales-optimization', icon: TrendingUp },
   { label: 'Purchase Orders', href: '/purchase-orders', icon: FileText },
   { label: 'Notifications', href: '/notifications', icon: Bell },
   { label: 'Analytics', href: '/analytics', icon: BarChart3 },

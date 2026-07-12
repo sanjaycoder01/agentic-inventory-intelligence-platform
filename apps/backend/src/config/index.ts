@@ -11,7 +11,7 @@ const envSchema = z.object({
     .default("mongodb://localhost:27017/inventory_intelligence"),
   AWS_REGION: z.string().min(1).default("us-east-1"),
   ANTHROPIC_API_KEY: z.string().optional().default(""),
-  /** Cron B — recommendation engine. Default: enabled in non-test envs. */
+  /** Cron B — replenishment. Default: enabled in non-test envs. */
   RECOMMENDATION_CRON_ENABLED: z
     .enum(["true", "false"])
     .optional()
@@ -19,6 +19,10 @@ const envSchema = z.object({
   /** Default: every 5 minutes */
   RECOMMENDATION_CRON_EXPRESSION: z.string().optional().default("*/5 * * * *"),
   RECOMMENDATION_CRON_DARK_STORE_ID: z.string().optional(),
+  /** Phase 2 — sales optimization cron. Default every 15 minutes. */
+  SALES_OPT_CRON_ENABLED: z.enum(["true", "false"]).optional().default("true"),
+  SALES_OPT_CRON_EXPRESSION: z.string().optional().default("*/15 * * * *"),
+  SALES_OPT_CRON_DARK_STORE_ID: z.string().optional(),
 });
 
 function loadConfig() {
@@ -37,6 +41,8 @@ function loadConfig() {
     env.NODE_ENV === "test"
       ? false
       : env.RECOMMENDATION_CRON_ENABLED === "true";
+  const salesOptCronEnabled =
+    env.NODE_ENV === "test" ? false : env.SALES_OPT_CRON_ENABLED === "true";
 
   return {
     port: env.PORT,
@@ -50,6 +56,11 @@ function loadConfig() {
       enabled: cronEnabled,
       expression: env.RECOMMENDATION_CRON_EXPRESSION,
       darkStoreId: env.RECOMMENDATION_CRON_DARK_STORE_ID || undefined,
+    },
+    salesOptimizationCron: {
+      enabled: salesOptCronEnabled,
+      expression: env.SALES_OPT_CRON_EXPRESSION,
+      darkStoreId: env.SALES_OPT_CRON_DARK_STORE_ID || undefined,
     },
   } as const;
 }

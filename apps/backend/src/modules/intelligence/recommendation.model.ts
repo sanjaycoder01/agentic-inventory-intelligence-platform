@@ -9,9 +9,26 @@ export const RECOMMENDATION_TYPES = [
   "INCREASE_ADS",
   "BUNDLE_PRODUCT",
   "RETURN_TO_WAREHOUSE",
+  // Phase 2 — sales optimization
+  "DISCOUNT",
+  "BUNDLE",
+  "RUN_ADS",
+  "PRICE_REVIEW",
+  "QUALITY_CHECK",
+  "CLEARANCE",
+  "LIQUIDATE",
+  "HOMEPAGE_HIGHLIGHT",
+  "MONITOR",
 ] as const;
 
 export type RecommendationType = (typeof RECOMMENDATION_TYPES)[number];
+
+export const INTELLIGENCE_TYPES = [
+  "REPLENISHMENT",
+  "SALES_OPTIMIZATION",
+] as const;
+
+export type IntelligenceType = (typeof INTELLIGENCE_TYPES)[number];
 
 export const RECOMMENDATION_STATUSES = [
   "PENDING",
@@ -29,6 +46,13 @@ const recommendationSchema = new Schema(
       type: String,
       required: true,
       unique: true,
+      index: true,
+    },
+    intelligenceType: {
+      type: String,
+      enum: INTELLIGENCE_TYPES,
+      required: true,
+      default: "REPLENISHMENT",
       index: true,
     },
     productId: {
@@ -67,6 +91,10 @@ const recommendationSchema = new Schema(
     summary: { type: String, required: true },
     factors: { type: [String], required: true, default: [] },
     recommendedQuantity: { type: Number, min: 0 },
+    /** Phase 2 metrics snapshot */
+    metrics: { type: Schema.Types.Mixed },
+    strategy: { type: String },
+    discountPercent: { type: Number, min: 0, max: 100 },
     status: {
       type: String,
       enum: RECOMMENDATION_STATUSES,
@@ -79,6 +107,8 @@ const recommendationSchema = new Schema(
     rejectedBy: { type: String },
     rejectedAt: { type: Date },
     rejectionReason: { type: String },
+    /** Phase 2 approval side-effect reference */
+    actionReferenceId: { type: String },
   },
   {
     timestamps: true,
@@ -92,6 +122,10 @@ recommendationSchema.index({ status: 1, generatedAt: -1 });
 recommendationSchema.index(
   { darkStoreId: 1, status: 1, generatedAt: -1 },
   { name: "idx_recommendations_darkStore_status_generatedAt" },
+);
+recommendationSchema.index(
+  { intelligenceType: 1, status: 1, generatedAt: -1 },
+  { name: "idx_recommendations_intelligence_status_generatedAt" },
 );
 
 export type RecommendationDocument = InferSchemaType<

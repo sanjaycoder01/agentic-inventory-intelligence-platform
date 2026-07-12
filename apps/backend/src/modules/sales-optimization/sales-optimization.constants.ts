@@ -1,0 +1,31 @@
+export const SALES_OPT_WINDOW_DAYS = 30;
+
+/** PRD sell-through strategy bands */
+export const SELL_THROUGH_BANDS = {
+  EXCELLENT_MIN: 90,
+  GOOD_MIN: 70,
+  SLOW_MIN: 40,
+  POOR_MIN: 20,
+} as const;
+
+export const VELOCITY_THRESHOLDS = {
+  /** avg daily sales */
+  FAST_MIN: 5,
+  NORMAL_MIN: 1,
+  SLOW_MIN: 0.2,
+} as const;
+
+export const STRATEGY_THRESHOLDS = {
+  LOW_SELL_THROUGH: 25,
+  HIGH_INVENTORY_AGE_DAYS: 90,
+  HIGH_INVENTORY_QTY: 50,
+  LOW_CONVERSION: 0.3,
+  HIGH_CART_LOW_ORDERS_CARTS: 20,
+  HIGH_CART_LOW_ORDERS_CONVERSION: 0.25,
+  LOW_RATING: 0.5,
+  DEAD_STOCK_SCORE: 0.7,
+  CLEARANCE_SELL_THROUGH: 20,
+  LIQUIDATE_AGE_DAYS: 120,
+} as const;
+
+export const SALES_OPT_CRON_DEFAULT = "*/15 * * * *";

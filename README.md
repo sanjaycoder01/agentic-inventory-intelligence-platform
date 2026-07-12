@@ -73,15 +73,18 @@ On startup the backend schedules Cron B (`node-cron`, every 5 minutes by default
 
 | Endpoint | Purpose |
 |----------|---------|
-| `POST /api/v1/recommendations/generate` | Run intelligence pipeline |
+| `POST /api/v1/recommendations/generate` | Run replenishment pipeline |
 | `GET /api/v1/recommendations/history` | Recommendation history (incl. EXPIRED) |
 | `GET /api/v1/recommendations/decisions/:productId` | `agentDecisions` audit trail |
 | `POST /api/v1/assistant/chat` | Read-only Claude assistant |
 | `GET /api/v1/stock-ledger?productId=` | Append-only stock movements |
 | `POST /api/v1/returns` | Create return-to-warehouse order |
+| `POST /api/v1/sales-optimization/generate` | Phase 2 sales optimization pipeline |
+| `GET /api/v1/sales-optimization` | Pending sales strategy recommendations |
 
 Set `ANTHROPIC_API_KEY` for live Claude explanations and assistant replies (templates/mocks used otherwise).
 
 ## Documentation
 
 See [`docs/`](docs/) for architecture diagrams, API specs, and architecture decision records.
+See [`docs/phase2.md`](docs/phase2.md) for Phase 2 requirements.

@@ -31,6 +31,7 @@ export class RecommendationPersistenceService {
 
     const savedRecommendation = await RecommendationModel.create({
       recommendationId: randomUUID(),
+      intelligenceType: "REPLENISHMENT",
       productId: signals.productId,
       darkStoreId: signals.darkStoreId,
       recommendationType: recommendation.recommendation,
@@ -68,6 +69,7 @@ export class RecommendationPersistenceService {
   async getPendingRecommendations(): Promise<RecommendationSnapshotDTO[]> {
     const recommendations = await RecommendationModel.find({
       status: { $in: ["PENDING", "BLOCKED"] },
+      intelligenceType: { $ne: "SALES_OPTIMIZATION" },
     }).sort({ generatedAt: -1 });
 
     return recommendations.map(toRecommendationSnapshotDTO);
@@ -78,7 +80,9 @@ export class RecommendationPersistenceService {
     darkStoreId?: string,
     limit = 50,
   ): Promise<RecommendationSnapshotDTO[]> {
-    const filter: Record<string, unknown> = {};
+    const filter: Record<string, unknown> = {
+      intelligenceType: { $ne: "SALES_OPTIMIZATION" },
+    };
     if (productId) filter.productId = productId;
     if (darkStoreId) filter.darkStoreId = darkStoreId;
 
@@ -97,7 +101,8 @@ export class RecommendationPersistenceService {
       {
         productId,
         darkStoreId,
-        status: "PENDING",
+        status: { $in: ["PENDING", "BLOCKED"] },
+        intelligenceType: { $ne: "SALES_OPTIMIZATION" },
       },
       {
         status: "EXPIRED",

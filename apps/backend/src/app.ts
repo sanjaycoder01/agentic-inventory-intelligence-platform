@@ -21,6 +21,7 @@ import { notificationRouter } from "./modules/notifications/notification.routes.
 import { returnsRouter } from "./modules/returns/returns.routes.js";
 import { assistantRouter } from "./modules/assistant/assistant.routes.js";
 import { stockLedgerService } from "./modules/inventory/stock-ledger.service.js";
+import { salesOptimizationRouter } from "./modules/sales-optimization/sales-optimization.routes.js";
 
 export function createApp(): Express {
   const app = express();
@@ -78,6 +79,7 @@ export function createApp(): Express {
   app.use("/api/v1/notifications", notificationRouter);
   app.use("/api/v1/returns", returnsRouter);
   app.use("/api/v1/stock-ledger", stockLedgerRouter);
+  app.use("/api/v1/sales-optimization", salesOptimizationRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

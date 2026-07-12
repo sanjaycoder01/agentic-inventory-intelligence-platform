@@ -7,6 +7,12 @@ export const AGENT_DECISION_NODES = [
   "WAREHOUSE_CHECK",
   "EXPLANATION",
   "PERSIST",
+  // Phase 2 — sales optimization
+  "AGGREGATE_METRICS",
+  "STRATEGY",
+  "INVENTORY_VALIDATION",
+  "SALES_EXPLANATION",
+  "SALES_PERSIST",
 ] as const;
 
 export type AgentDecisionNode = (typeof AGENT_DECISION_NODES)[number];

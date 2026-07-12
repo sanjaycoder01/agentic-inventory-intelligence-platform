@@ -4,6 +4,7 @@ import { createApp } from "./app.js";
 import { config } from "./config/index.js";
 import { connectMongoDB, disconnectMongoDB } from "./db/connection.js";
 import { RecommendationScheduler } from "./modules/intelligence/recommendation.scheduler.js";
+import { SalesOptimizationScheduler } from "./modules/sales-optimization/sales-optimization.scheduler.js";
 
 async function main() {
   await connectMongoDB();
@@ -22,9 +23,17 @@ async function main() {
   });
   recommendationScheduler.start();
 
+  const salesOptimizationScheduler = new SalesOptimizationScheduler({
+    enabled: config.salesOptimizationCron.enabled,
+    cronExpression: config.salesOptimizationCron.expression,
+    darkStoreId: config.salesOptimizationCron.darkStoreId,
+  });
+  salesOptimizationScheduler.start();
+
   const shutdown = (signal: string) => {
     console.log(`Received ${signal}, shutting down...`);
     recommendationScheduler.stop();
+    salesOptimizationScheduler.stop();
     server.close(async () => {
       await disconnectMongoDB();
       process.exit(0);
