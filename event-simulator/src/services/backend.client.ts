@@ -131,7 +131,8 @@ function toBackendRatingPayload(rating: RatingDTO, persistedOrderId: string) {
     productId: rating.productId,
     darkStoreId: rating.darkStoreId,
     rating: rating.rating,
-    review: rating.review,
+    // Zod optional() rejects null — omit empty reviews
+    ...(rating.review != null ? { review: rating.review } : {}),
   };
 }
 

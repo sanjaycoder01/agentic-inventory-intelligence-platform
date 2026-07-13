@@ -21,7 +21,7 @@ export default function ProductsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {data?.map((p: any) => (
-            <div key={p._id} className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm">
+            <div key={p.id || p._id} className="bg-white border border-zinc-200 rounded-xl p-6 shadow-sm">
               <h3 className="font-bold text-zinc-900">{p.name}</h3>
               <p className="text-sm text-zinc-500 mt-1">Category: {p.category}</p>
               <p className="text-sm text-zinc-500">Brand: {p.brand}</p>

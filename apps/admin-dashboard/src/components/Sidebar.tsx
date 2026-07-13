@@ -15,15 +15,15 @@ import {
 
 const menuItems = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'Inventory', href: '/inventory', icon: PackageSearch },
-  { label: 'Products', href: '/products', icon: Package },
-  { label: 'Recommendations', href: '/recommendations', icon: Lightbulb },
+  { label: 'Inventory', href: '/dashboard/inventory', icon: PackageSearch },
+  { label: 'Products', href: '/dashboard/products', icon: Package },
+  { label: 'Recommendations', href: '/dashboard/recommendations', icon: Lightbulb },
   { label: 'Sales Optimization', href: '/dashboard/sales-optimization', icon: TrendingUp },
-  { label: 'Purchase Orders', href: '/purchase-orders', icon: FileText },
-  { label: 'Notifications', href: '/notifications', icon: Bell },
-  { label: 'Analytics', href: '/analytics', icon: BarChart3 },
-  { label: 'AI Assistant', href: '/ai', icon: Bot },
-  { label: 'Settings', href: '/settings', icon: Settings },
+  { label: 'Purchase Orders', href: '/dashboard/purchase-orders', icon: FileText },
+  { label: 'Notifications', href: '/dashboard/notifications', icon: Bell },
+  { label: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
+  { label: 'AI Assistant', href: '/dashboard/ai', icon: Bot },
+  { label: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
 
 export default function Sidebar() {

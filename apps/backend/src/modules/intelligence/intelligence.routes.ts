@@ -88,11 +88,17 @@ intelligenceRouter.post("/:id/approve", async (req, res, next) => {
       });
       return;
     }
-    const result = await workflowService.runApprovedRecommendationWorkflow(rec);
-    await recommendationPersistenceService.approveRecommendation(
+    // Mark APPROVED before workflow — workflow validates status === APPROVED
+    // and creates the purchase order / warehouse allocation.
+    const approved = await recommendationPersistenceService.approveRecommendation(
       req.params.id,
       req.body.approvedBy ?? "admin",
     );
+    const result = await workflowService.runApprovedRecommendationWorkflow({
+      ...rec,
+      ...approved,
+      status: "APPROVED",
+    });
     res.json({ success: true, result });
   } catch (err) {
     next(err);

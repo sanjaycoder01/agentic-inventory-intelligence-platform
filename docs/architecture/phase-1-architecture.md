@@ -109,7 +109,7 @@ sequenceDiagram
 **Notes**
 
 - Scenarios (e.g. high demand, poor rating / MacBook pattern) live in `event-simulator/`.
-- **Cron A** (auto-simulate every minute) is optional and not required for Phase 1.
+- **Cron A** (`npm run cron:simulator`, every 1 minute) continuously publishes synthetic customer events to SQS. The consumer must run in parallel (`npm run queue:consumer`, batch size 10).
 - Message grouping by product supports per-product ordering when used for scoring jobs later; today SQS primarily carries **ingestion** events.
 
 ---

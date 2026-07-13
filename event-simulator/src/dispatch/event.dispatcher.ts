@@ -45,20 +45,23 @@ export class EventDispatcher {
 
     for (const event of eventList) {
       const eventId = event.eventId;
-      if (eventId) {
-        if (this.processedEvents.has(eventId)) {
-          results.push({
-            simulationRunId: event.simulationRunId,
-            type: event.type,
-            result: { success: true, status: 200, response: { message: "Already processed" } },
-            dispatchedAt: new Date(),
-          });
-          continue;
-        }
-        this.processedEvents.add(eventId);
+      if (eventId && this.processedEvents.has(eventId)) {
+        results.push({
+          simulationRunId: event.simulationRunId,
+          type: event.type,
+          result: { success: true, status: 200, response: { message: "Already processed" } },
+          dispatchedAt: new Date(),
+        });
+        continue;
       }
 
       const result = await this.dispatchOne(event);
+
+      // Only mark processed after a successful backend write so SQS retries
+      // can re-dispatch failed ORDER/RATING events (e.g. temporary stockouts).
+      if (eventId && result.success) {
+        this.processedEvents.add(eventId);
+      }
 
       results.push({
         simulationRunId: event.simulationRunId,

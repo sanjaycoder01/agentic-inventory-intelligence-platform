@@ -65,24 +65,41 @@ npm run seed
 | `/api/purchase-orders` | `GET /`, `POST /`, `POST /:id/approve`, `POST /:id/reject` |
 | `/api/assistant` | `POST /chat`, `GET /tools` |
 
-## Recommendation cron (Pipeline 3)
+## Continuous quick-commerce loop
 
-On startup the backend schedules Cron B (`node-cron`, every 5 minutes by default) to regenerate recommendations from Mongo signals. Configure via `RECOMMENDATION_CRON_*` in `.env` (see `.env.example`). Disable with `RECOMMENDATION_CRON_ENABLED=false`. Manual trigger remains `POST /api/v1/recommendations/generate`.
+```
+Seed (once) → Cron A (1 min) → SQS → Consumer (batch 10) → Mongo signals
+                              → Cron B (5 min)  → Replenishment recommendations → Approve → PO
+                              → Cron C (15 min) → Sales strategies → Approve → Sales Action
+```
 
-### Phase 1 intelligence extras
+```bash
+# 1) One-time data
+npm run reset-db && npm run seed
 
-| Endpoint | Purpose |
-|----------|---------|
-| `POST /api/v1/recommendations/generate` | Run replenishment pipeline |
-| `GET /api/v1/recommendations/history` | Recommendation history (incl. EXPIRED) |
-| `GET /api/v1/recommendations/decisions/:productId` | `agentDecisions` audit trail |
-| `POST /api/v1/assistant/chat` | Read-only Claude assistant |
-| `GET /api/v1/stock-ledger?productId=` | Append-only stock movements |
-| `POST /api/v1/returns` | Create return-to-warehouse order |
-| `POST /api/v1/sales-optimization/generate` | Phase 2 sales optimization pipeline |
-| `GET /api/v1/sales-optimization` | Pending sales strategy recommendations |
+# 2) Backend — Cron B + Cron C + Claude explanations
+npm run dev:backend
 
-Set `ANTHROPIC_API_KEY` for live Claude explanations and assistant replies (templates/mocks used otherwise).
+# 3) SQS consumer — batch receive (10) → cartEvents / orders / ratings
+npm run queue:consumer
+
+# 4) Cron A — simulate customer behaviour → publish to SQS every minute
+npm run cron:simulator
+
+# 5) Dashboard
+npm run dev:dashboard
+```
+
+| Cron | Interval | Responsibility |
+|------|----------|----------------|
+| **A** | 1 min | Event simulator → AWS SQS FIFO |
+| **B** | 5 min | Replenishment scoring from Mongo signals |
+| **C** | 15 min | Sales optimization strategies |
+
+Manual one-shot simulate (without Cron A): `npm run simulate -- HIGH_DEMAND 25`
+
+Set `ANTHROPIC_API_KEY` in root `.env` for live Claude recommendation explanations.
+
 
 ## Documentation
 
