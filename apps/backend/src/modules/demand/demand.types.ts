@@ -1,4 +1,13 @@
 import type { CartEventDocument } from "./demand.model.js";
+import type { DemandIntelligenceMetrics } from "./demand-intelligence.types.js";
+
+export type {
+  DemandIntelligenceMetrics,
+  DemandTrendLabel,
+  DemandVelocityLabel,
+  DemandWindowCounts,
+  ProductDemandDTO,
+} from "./demand-intelligence.types.js";
 
 export interface CartEventResponseDTO {
   id: string;
@@ -10,13 +19,6 @@ export interface CartEventResponseDTO {
   eventTimestamp: Date;
   sessionId: string;
   createdAt: Date;
-}
-
-export interface ProductDemandDTO {
-  productId: string;
-  cartCount24h: number;
-  demandScore: number;
-  windowHours: number;
 }
 
 export interface TrendingProductDTO {
@@ -44,4 +46,20 @@ export function toCartEventResponseDTO(event: CartEventLike): CartEventResponseD
     sessionId: event.sessionId,
     createdAt: event.createdAt,
   };
+}
+
+/** Flatten demand intelligence into explanation factor strings */
+export function demandIntelligenceFactorLines(
+  metrics: DemandIntelligenceMetrics,
+): string[] {
+  return [
+    `Demand Score: ${metrics.demandScore.toFixed(2)}`,
+    `Demand 5m: ${metrics.last5Min}`,
+    `Demand 30m: ${metrics.last30Min}`,
+    `Demand 2h: ${metrics.last2Hours}`,
+    `Demand 24h: ${metrics.last24Hours}`,
+    `Demand Velocity: ${metrics.velocity} (${metrics.velocityPercent}%)`,
+    `Demand Trend: ${metrics.trend}`,
+    `Baseline Multiplier: ${metrics.baselineMultiplier}x`,
+  ];
 }

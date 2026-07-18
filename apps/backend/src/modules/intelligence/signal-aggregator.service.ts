@@ -27,7 +27,7 @@ export class SignalAggregatorService {
   ): Promise<ProductSignals> {
     const [demand, conversion, rating, inventory, warehouseStock] =
       await Promise.all([
-        this.dependencies.demandService.getProductDemand(productId),
+        this.dependencies.demandService.getProductDemand(productId, darkStoreId),
         this.dependencies.orderService.getConversionScore(productId),
         this.dependencies.ratingService.getRatingScore(productId),
         this.dependencies.inventoryService.getInventoryByProduct(
@@ -60,6 +60,7 @@ export class SignalAggregatorService {
       warehouseStock,
       averageRating: rating.averageRating,
       totalRatings: rating.totalRatings,
+      demandIntelligence: demand.demandIntelligence,
     };
   }
 

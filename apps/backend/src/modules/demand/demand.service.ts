@@ -4,7 +4,14 @@ import { NotFoundError, ValidationError } from "../../middleware/app-errors.js";
 import { logger } from "../../utils/logger.js";
 import { DarkStoreModel } from "../dark-store/dark-store.model.js";
 import { ProductModel } from "../products/product.model.js";
-import { DEMAND_ERRORS, DEMAND_LOG, DEMAND_WINDOW_HOURS } from "./demand.constants.js";
+import { calculateDemandIntelligence } from "./demand-intelligence.calculations.js";
+import { DEMAND_WINDOWS } from "./demand-intelligence.constants.js";
+import type { DemandIntelligenceMetrics } from "./demand-intelligence.types.js";
+import {
+  DEMAND_ERRORS,
+  DEMAND_LOG,
+  DEMAND_WINDOW_HOURS,
+} from "./demand.constants.js";
 import { CartEventModel } from "./demand.model.js";
 import {
   toCartEventResponseDTO,
@@ -20,13 +27,18 @@ function assertValidObjectId(id: string, label: string) {
   }
 }
 
-function getDemandWindowStart(hours = DEMAND_WINDOW_HOURS) {
+function minutesAgo(minutes: number): Date {
   const since = new Date();
-  since.setHours(since.getHours() - hours);
+  since.setMinutes(since.getMinutes() - minutes);
   return since;
 }
 
-function calculateDemandScore(cartCount: number, maxCartCount: number) {
+function getDemandWindowStart(hours = DEMAND_WINDOW_HOURS) {
+  return minutesAgo(hours * 60);
+}
+
+/** Legacy relative score — kept for trending comparison across catalog */
+function calculateRelativeDemandScore(cartCount: number, maxCartCount: number) {
   if (maxCartCount <= 0) {
     return 0;
   }
@@ -102,18 +114,27 @@ export class DemandService {
     return results;
   }
 
-  async recordCartEvent(data: RecordCartEventDTO): Promise<CartEventResponseDTO> {
+  async recordCartEvent(
+    data: RecordCartEventDTO,
+  ): Promise<{ event: CartEventResponseDTO; created: boolean }> {
     await this.assertProductExists(data.productId);
     await this.assertDarkStoreExists(data.darkStoreId);
+
+    const eventId = data.eventId ?? randomUUID();
+    const existing = await CartEventModel.findOne({ eventId });
+    if (existing) {
+      return { event: toCartEventResponseDTO(existing), created: false };
+    }
 
     logger.info(DEMAND_LOG.RECORDING_CART_EVENT, {
       productId: data.productId,
       darkStoreId: data.darkStoreId,
       eventType: data.eventType,
+      eventId,
     });
 
     const event = await CartEventModel.create({
-      eventId: randomUUID(),
+      eventId,
       productId: data.productId,
       darkStoreId: data.darkStoreId,
       quantity: data.quantity,
@@ -127,19 +148,33 @@ export class DemandService {
       productId: data.productId,
     });
 
-    return toCartEventResponseDTO(event);
+    return { event: toCartEventResponseDTO(event), created: true };
   }
 
-  async getCartCount(productId: string, since: Date): Promise<number> {
+  async getCartCount(
+    productId: string,
+    since: Date,
+    darkStoreId?: string,
+  ): Promise<number> {
     assertValidObjectId(productId, "product ID");
+    if (darkStoreId) {
+      assertValidObjectId(darkStoreId, "dark store ID");
+    }
+
+    const matchBase: Record<string, unknown> = {
+      productId: new Types.ObjectId(productId),
+      eventTimestamp: { $gte: since },
+    };
+    if (darkStoreId) {
+      matchBase.darkStoreId = new Types.ObjectId(darkStoreId);
+    }
 
     const [adds, removes] = await Promise.all([
       CartEventModel.aggregate<{ total: number }>([
         {
           $match: {
-            productId: new Types.ObjectId(productId),
+            ...matchBase,
             eventType: "ADD_TO_CART",
-            eventTimestamp: { $gte: since },
           },
         },
         { $group: { _id: null, total: { $sum: "$quantity" } } },
@@ -147,9 +182,8 @@ export class DemandService {
       CartEventModel.aggregate<{ total: number }>([
         {
           $match: {
-            productId: new Types.ObjectId(productId),
+            ...matchBase,
             eventType: "REMOVE_FROM_CART",
-            eventTimestamp: { $gte: since },
           },
         },
         { $group: { _id: null, total: { $sum: "$quantity" } } },
@@ -162,33 +196,65 @@ export class DemandService {
     return Math.max(0, added - removed);
   }
 
-  async getDemandScore(productId: string): Promise<number> {
-    const since = getDemandWindowStart();
-    const [cartCount24h, aggregates] = await Promise.all([
-      this.getCartCount(productId, since),
-      this.aggregateCartCounts(since),
+  /**
+   * Multi-window demand intelligence for a product (optionally scoped to a dark store).
+   */
+  async getDemandIntelligence(
+    productId: string,
+    darkStoreId?: string,
+  ): Promise<DemandIntelligenceMetrics> {
+    const [last5Min, last30Min, last2Hours, last24Hours] = await Promise.all([
+      this.getCartCount(productId, minutesAgo(DEMAND_WINDOWS.FIVE_MIN), darkStoreId),
+      this.getCartCount(
+        productId,
+        minutesAgo(DEMAND_WINDOWS.THIRTY_MIN),
+        darkStoreId,
+      ),
+      this.getCartCount(
+        productId,
+        minutesAgo(DEMAND_WINDOWS.TWO_HOURS),
+        darkStoreId,
+      ),
+      this.getCartCount(
+        productId,
+        minutesAgo(DEMAND_WINDOWS.TWENTY_FOUR_HOURS),
+        darkStoreId,
+      ),
     ]);
 
-    const maxCartCount = aggregates.reduce(
-      (max, item) => Math.max(max, item.cartCount),
-      0,
-    );
-
-    return calculateDemandScore(cartCount24h, maxCartCount);
+    return calculateDemandIntelligence({
+      last5Min,
+      last30Min,
+      last2Hours,
+      last24Hours,
+    });
   }
 
-  async getProductDemand(productId: string): Promise<ProductDemandDTO> {
-    await this.assertProductExists(productId);
+  async getDemandScore(productId: string, darkStoreId?: string): Promise<number> {
+    const intelligence = await this.getDemandIntelligence(productId, darkStoreId);
+    return intelligence.demandScore;
+  }
 
-    const since = getDemandWindowStart();
-    const cartCount24h = await this.getCartCount(productId, since);
-    const demandScore = await this.getDemandScore(productId);
+  async getProductDemand(
+    productId: string,
+    darkStoreId?: string,
+  ): Promise<ProductDemandDTO> {
+    await this.assertProductExists(productId);
+    if (darkStoreId) {
+      await this.assertDarkStoreExists(darkStoreId);
+    }
+
+    const demandIntelligence = await this.getDemandIntelligence(
+      productId,
+      darkStoreId,
+    );
 
     return {
       productId,
-      cartCount24h,
-      demandScore,
+      cartCount24h: demandIntelligence.last24Hours,
+      demandScore: demandIntelligence.demandScore,
       windowHours: DEMAND_WINDOW_HOURS,
+      demandIntelligence,
     };
   }
 
@@ -209,7 +275,7 @@ export class DemandService {
       .map((item) => ({
         productId: item._id.toString(),
         cartCount24h: item.cartCount,
-        demandScore: calculateDemandScore(item.cartCount, maxCartCount),
+        demandScore: calculateRelativeDemandScore(item.cartCount, maxCartCount),
       }))
       .sort((a, b) => b.demandScore - a.demandScore || b.cartCount24h - a.cartCount24h)
       .slice(0, limit);

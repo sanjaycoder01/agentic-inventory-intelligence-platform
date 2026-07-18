@@ -48,6 +48,7 @@ export class RecommendationPersistenceService {
       summary: explanation.summary,
       factors: explanation.factors,
       recommendedQuantity,
+      demandIntelligence: signals.demandIntelligence,
       status: input.status ?? "PENDING",
       generatedAt: new Date(),
     });

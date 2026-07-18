@@ -93,6 +93,8 @@ const recommendationSchema = new Schema(
     recommendedQuantity: { type: Number, min: 0 },
     /** Phase 2 metrics snapshot */
     metrics: { type: Schema.Types.Mixed },
+    /** Phase 1 demand intelligence (multi-window / velocity / trend) */
+    demandIntelligence: { type: Schema.Types.Mixed },
     strategy: { type: String },
     discountPercent: { type: Number, min: 0, max: 100 },
     status: {

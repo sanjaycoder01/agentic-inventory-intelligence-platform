@@ -24,7 +24,14 @@ export class BackendClient implements BackendClientPort {
   }
 
   async sendCartEvent(event: CartEvent): Promise<BackendClientResult> {
-    return this.post("/api/v1/cart-events", event.payload, event);
+    return this.post(
+      "/api/v1/cart-events",
+      {
+        ...event.payload,
+        ...(event.eventId ? { eventId: event.eventId } : {}),
+      },
+      event,
+    );
   }
 
   async sendOrder(event: OrderEvent): Promise<BackendClientResult> {

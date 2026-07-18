@@ -3,6 +3,7 @@ import { validate } from "../../middleware/validate.js";
 import { CART_EVENT_TYPES } from "./demand.model.js";
 
 export const recordCartEventSchema = z.object({
+  eventId: z.string().trim().min(1).optional(),
   productId: z.string().trim().min(1, "Product ID is required"),
   darkStoreId: z.string().trim().min(1, "Dark store ID is required"),
   quantity: z.number().int().positive("Quantity must be a positive integer").default(1),

@@ -1,3 +1,4 @@
+import type { DemandIntelligenceMetrics } from "../demand/demand-intelligence.types.js";
 import type {
   RecommendationDocument,
   RecommendationStatus,
@@ -38,6 +39,7 @@ export interface RecommendationSnapshotDTO {
   recommendedQuantity?: number;
   cartCount24h?: number;
   windowHours?: number;
+  demandIntelligence?: DemandIntelligenceMetrics;
   summary: string;
   factors: string[];
   status: RecommendationStatus;
@@ -66,6 +68,7 @@ type RecommendationLike = RecommendationDocument & {
   reservedQuantity?: number | null;
   warehouseStock: number;
   recommendedQuantity?: number | null;
+  demandIntelligence?: DemandIntelligenceMetrics | null;
   summary: string;
   factors: string[];
   status: RecommendationStatus;
@@ -97,6 +100,7 @@ export function toRecommendationSnapshotDTO(
     reservedQuantity: recommendation.reservedQuantity ?? undefined,
     warehouseStock: recommendation.warehouseStock,
     recommendedQuantity: recommendation.recommendedQuantity ?? undefined,
+    demandIntelligence: recommendation.demandIntelligence ?? undefined,
     summary: recommendation.summary,
     factors: recommendation.factors,
     status: recommendation.status,

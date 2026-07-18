@@ -7,9 +7,18 @@ import type { RecordCartEventDTO } from "./demand.validation.js";
 
 export class DemandController {
   recordCartEvent = asyncHandler(async (req: Request, res: Response) => {
-    const event = await demandService.recordCartEvent(req.body as RecordCartEventDTO);
+    const result = await demandService.recordCartEvent(
+      req.body as RecordCartEventDTO,
+    );
 
-    sendSuccess(res, 201, DEMAND_MESSAGES.CART_EVENT_RECORDED, event);
+    sendSuccess(
+      res,
+      result.created ? 201 : 200,
+      result.created
+        ? DEMAND_MESSAGES.CART_EVENT_RECORDED
+        : "Cart event already recorded",
+      result.event,
+    );
   });
 
   getProductDemand = asyncHandler(async (

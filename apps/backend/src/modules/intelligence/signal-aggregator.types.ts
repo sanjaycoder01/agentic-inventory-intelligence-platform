@@ -1,3 +1,5 @@
+import type { DemandIntelligenceMetrics } from "../demand/demand-intelligence.types.js";
+
 export interface ProductSignals {
   productId: string;
   darkStoreId: string;
@@ -14,15 +16,21 @@ export interface ProductSignals {
   warehouseStock: number;
   averageRating: number;
   totalRatings: number;
+  /** Multi-window demand intelligence (explainability + dashboard) */
+  demandIntelligence?: DemandIntelligenceMetrics;
 }
 
 export interface SignalAggregatorDependencies {
   demandService: {
-    getDemandScore(productId: string): Promise<number>;
-    getProductDemand(productId: string): Promise<{
+    getDemandScore(productId: string, darkStoreId?: string): Promise<number>;
+    getProductDemand(
+      productId: string,
+      darkStoreId?: string,
+    ): Promise<{
       cartCount24h: number;
       demandScore: number;
       windowHours: number;
+      demandIntelligence?: DemandIntelligenceMetrics;
     }>;
   };
   orderService: {

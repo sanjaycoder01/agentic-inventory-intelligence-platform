@@ -84,8 +84,9 @@ export class RecommendationPipelineService {
         availableQuantity: signals.availableQuantity,
         warehouseStock: signals.warehouseStock,
         cartCount24h: signals.cartCount24h,
+        demandIntelligence: signals.demandIntelligence,
       },
-      reasoningText: "Aggregated demand, conversion, rating, and inventory signals.",
+      reasoningText: "Aggregated demand intelligence, conversion, rating, and inventory signals.",
     });
 
     const eligibility = eligibilityService.evaluate(signals);

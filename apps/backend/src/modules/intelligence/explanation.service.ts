@@ -1,4 +1,5 @@
 import { claudeClient } from "../ai/llm/claude.client.js";
+import { demandIntelligenceFactorLines } from "../demand/demand.types.js";
 import type { AggregatedSignals } from "./recommendation.types.js";
 import type { RecommendationResult } from "./recommendation.types.js";
 import { explanationTemplates } from "./explanation.templates.js";
@@ -15,7 +16,8 @@ Rules:
 - Use ONLY the facts provided in the user message.
 - Do NOT invent numbers, percentages, or quantities that are not in the facts.
 - Do NOT change the decision — only explain it in plain language (2-3 sentences).
-- Never compute scores; scores are already decided deterministically.`;
+- Never compute scores; scores are already decided deterministically.
+- When demand intelligence windows, velocity, trend, or baseline multiplier are present, mention them briefly.`;
 
 export class ExplanationService {
   /** Deterministic template explanation (always available as fallback). */
@@ -33,9 +35,13 @@ export class ExplanationService {
         signals.conversionScore,
       );
 
+    const demandFactors = signals.demandIntelligence
+      ? demandIntelligenceFactorLines(signals.demandIntelligence)
+      : [`Demand Score: ${formatScore(signals.demandScore)}`];
+
     const factors = [
       `Replenishment Score: ${formatScore(replenishmentScore)}`,
-      `Demand Score: ${formatScore(signals.demandScore)}`,
+      ...demandFactors,
       `Conversion Score: ${formatScore(signals.conversionScore)}`,
       `Rating Score: ${formatScore(signals.ratingScore)}`,
       `Available Inventory: ${signals.availableQuantity}`,
@@ -87,6 +93,8 @@ export class ExplanationService {
           })
         : undefined);
 
+    const di = signals.demandIntelligence;
+
     try {
       const facts = [
         `Decision: ${options?.blocked ? "BLOCKED" : recommendation.recommendation}`,
@@ -101,6 +109,14 @@ export class ExplanationService {
             ),
         )}`,
         `Demand score: ${formatScore(signals.demandScore)}`,
+        di
+          ? `Demand windows — 5m: ${di.last5Min}, 30m: ${di.last30Min}, 2h: ${di.last2Hours}, 24h: ${di.last24Hours}`
+          : null,
+        di
+          ? `Demand velocity: ${di.velocity} (${di.velocityPercent}%)`
+          : null,
+        di ? `Demand trend: ${di.trend}` : null,
+        di ? `Baseline multiplier: ${di.baselineMultiplier}x` : null,
         `Conversion score: ${formatScore(signals.conversionScore)}`,
         `Rating score: ${formatScore(signals.ratingScore)}`,
         `Store available qty: ${signals.availableQuantity}`,
@@ -108,7 +124,7 @@ export class ExplanationService {
         recommendedQuantity != null
           ? `Recommended reorder qty: ${recommendedQuantity}`
           : null,
-        `Cart adds (window): ${signals.cartCount24h ?? 0}`,
+        `Cart adds (24h): ${signals.cartCount24h ?? 0}`,
         `Average rating: ${formatScore(signals.averageRating)} (${signals.totalRatings} ratings)`,
       ]
         .filter(Boolean)
